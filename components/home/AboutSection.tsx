@@ -1,4 +1,104 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { getProfile, ProfileData } from "@/lib/firebase/profile";
+
 export default function AboutSection() {
+  const [profile, setProfile] =
+    useState<Partial<ProfileData> | null>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const data = await getProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error("Gagal mengambil data profil:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
+  /*
+   * Format angka agar lebih nyaman dibaca.
+   * Contoh:
+   * 3200 → 3.2k
+   * 3500 → 3.5k
+   * 15 → 15
+   */
+  function formatNumber(
+    value: number | null | undefined
+  ) {
+    if (value === null || value === undefined) {
+      return "-";
+    }
+
+    if (value >= 1000) {
+      const formatted = (value / 1000)
+        .toFixed(1)
+        .replace(".0", "");
+
+      return `${formatted}k`;
+    }
+
+    return value.toLocaleString("id-ID");
+  }
+
+  /*
+   * Format luas wilayah.
+   */
+  function formatArea(
+    value: number | null | undefined,
+    unit: string | undefined
+  ) {
+    if (value === null || value === undefined) {
+      return "-";
+    }
+
+    return `${value.toLocaleString("id-ID")} ${unit || "km²"}`;
+  }
+
+  /*
+   * Loading sederhana supaya tidak langsung
+   * menampilkan data kosong ketika halaman pertama dibuka.
+   */
+  if (loading) {
+    return (
+      <section
+        id="jelajah"
+        className="
+          bg-white py-24
+          transition-colors duration-500
+          dark:bg-[#0a110e]
+          lg:py-28
+        "
+      >
+        <div className="mx-auto grid max-w-[1320px] items-center gap-14 px-6 lg:grid-cols-2 lg:px-8">
+
+          <div className="max-w-[540px]">
+            <div className="h-3 w-28 animate-pulse rounded-full bg-[#e9f1ed] dark:bg-[#17352a]" />
+
+            <div className="mt-4 h-10 w-72 animate-pulse rounded-lg bg-[#edf2ef] dark:bg-[#17352a]" />
+
+            <div className="mt-8 space-y-3">
+              <div className="h-4 w-full animate-pulse rounded bg-[#edf2ef] dark:bg-[#17352a]" />
+              <div className="h-4 w-[92%] animate-pulse rounded bg-[#edf2ef] dark:bg-[#17352a]" />
+              <div className="h-4 w-[80%] animate-pulse rounded bg-[#edf2ef] dark:bg-[#17352a]" />
+            </div>
+          </div>
+
+          <div className="h-[360px] animate-pulse rounded-[28px] bg-[#e9f1ed] dark:bg-[#17352a] sm:h-[440px]" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       id="jelajah"
@@ -10,10 +110,12 @@ export default function AboutSection() {
       "
     >
       <div className="mx-auto grid max-w-[1320px] items-center gap-14 px-6 lg:grid-cols-2 lg:px-8">
+
         {/* =====================================================
             TEXT
         ====================================================== */}
         <div className="max-w-[540px]">
+
           <span
             className="
               text-[10px]
@@ -43,36 +145,68 @@ export default function AboutSection() {
             Kenali Kampung Paluh
           </h2>
 
-          <p
-            className="
-              mt-6
-              text-[15px]
-              leading-[1.8]
-              text-[#68716d]
-              transition-colors duration-500
-              dark:text-[#9eaea6]
-            "
-          >
-            Kampung Paluh telah dikenal sejak tahun 1937 dan pada awalnya
-            berkembang melalui perkebunan sawit dan karet. Nama “Paluh”
-            dipercaya berasal dari kata “peluh”, yang terucap oleh masyarakat
-            saat membuka lahan perkebunan.
-          </p>
+          {/* Deskripsi dari CMS */}
+          {profile?.deskripsiSingkat ? (
+            <p
+              className="
+                mt-6
+                text-[15px]
+                leading-[1.8]
+                text-[#68716d]
+                transition-colors duration-500
+                dark:text-[#9eaea6]
+              "
+            >
+              {profile.deskripsiSingkat}
+            </p>
+          ) : (
+            <>
+              <p
+                className="
+                  mt-6
+                  text-[15px]
+                  leading-[1.8]
+                  text-[#68716d]
+                  transition-colors duration-500
+                  dark:text-[#9eaea6]
+                "
+              >
+                Kampung Paluh merupakan kampung yang memiliki
+                sejarah, potensi lokal, serta kehidupan masyarakat
+                yang terus berkembang.
+              </p>
 
-          <p
-            className="
-              mt-4
-              text-[15px]
-              leading-[1.8]
-              text-[#68716d]
-              transition-colors duration-500
-              dark:text-[#9eaea6]
-            "
-          >
-            Seiring waktu, Kampung Paluh terus berkembang dan menjadi bagian
-            dari perjalanan masyarakat yang menjaga kehidupan kampung melalui
-            pembangunan serta musyawarah bersama.
-          </p>
+              <p
+                className="
+                  mt-4
+                  text-[15px]
+                  leading-[1.8]
+                  text-[#68716d]
+                  transition-colors duration-500
+                  dark:text-[#9eaea6]
+                "
+              >
+                Kenali lebih dekat sejarah, kehidupan masyarakat,
+                dan berbagai potensi yang dimiliki Kampung Paluh.
+              </p>
+            </>
+          )}
+
+          {/* Sejarah Singkat */}
+          {profile?.sejarahSingkat && (
+            <p
+              className="
+                mt-4
+                text-[15px]
+                leading-[1.8]
+                text-[#68716d]
+                transition-colors duration-500
+                dark:text-[#9eaea6]
+              "
+            >
+              {profile.sejarahSingkat}
+            </p>
+          )}
 
           {/* Link */}
           <a
@@ -92,9 +226,8 @@ export default function AboutSection() {
             "
           >
             Baca Sejarah Kampung
-            <span
-              className="transition-transform duration-300"
-            >
+
+            <span className="transition-transform duration-300">
               →
             </span>
           </a>
@@ -104,6 +237,7 @@ export default function AboutSection() {
             IMAGE
         ====================================================== */}
         <div className="relative">
+
           <div
             className="
               relative
@@ -143,118 +277,131 @@ export default function AboutSection() {
           </div>
 
           {/* =================================================
-    STATS
-================================================== */}
-<div
-  className="
-    absolute
-    bottom-5
-    left-5
-    right-5
-    flex
-    items-center
-    justify-between
-    gap-4
-    rounded-[18px]
-    border
-    border-white/50
-    bg-white/90
-    px-5
-    py-5
-    shadow-lg
-    backdrop-blur-md
-    transition-colors duration-500
-    dark:border-white/10
-    dark:bg-[#10221b]/90
-    sm:left-6
-    sm:right-6
-    sm:px-6
-  "
->
-  {/* Penduduk */}
-  <div className="min-w-0">
-    <div
-      className="
-        text-[22px]
-        font-semibold
-        tracking-[-0.04em]
-        text-[#123e31]
-        dark:text-[#9de0bf]
-      "
-    >
-      3.2k
-    </div>
+              STATS
+          ================================================== */}
+          <div
+            className="
+              absolute
+              bottom-5
+              left-5
+              right-5
+              flex
+              items-center
+              justify-between
+              gap-4
+              rounded-[18px]
+              border
+              border-white/50
+              bg-white/90
+              px-5
+              py-5
+              shadow-lg
+              backdrop-blur-md
+              transition-colors duration-500
+              dark:border-white/10
+              dark:bg-[#10221b]/90
+              sm:left-6
+              sm:right-6
+              sm:px-6
+            "
+          >
 
-    <div
-      className="
-        mt-0.5
-        text-[10px]
-        text-[#727b77]
-        dark:text-[#8fa099]
-      "
-    >
-      Penduduk
-    </div>
-  </div>
+            {/* Penduduk */}
+            <div className="min-w-0">
 
-  {/* Divider */}
-  <div className="h-9 w-px shrink-0 bg-[#dfe6e2] dark:bg-white/10" />
+              <div
+                className="
+                  text-[22px]
+                  font-semibold
+                  tracking-[-0.04em]
+                  text-[#123e31]
+                  dark:text-[#9de0bf]
+                "
+              >
+                {formatNumber(profile?.jumlahPenduduk)}
+              </div>
 
-  {/* UMKM */}
-  <div className="min-w-0">
-    <div
-      className="
-        text-[22px]
-        font-semibold
-        tracking-[-0.04em]
-        text-[#075b43]
-        dark:text-[#75c6a4]
-      "
-    >
-      15+
-    </div>
+              <div
+                className="
+                  mt-0.5
+                  text-[10px]
+                  text-[#727b77]
+                  dark:text-[#8fa099]
+                "
+              >
+                Penduduk
+              </div>
 
-    <div
-      className="
-        mt-0.5
-        text-[10px]
-        text-[#727b77]
-        dark:text-[#8fa099]
-      "
-    >
-      UMKM Aktif
-    </div>
-  </div>
+            </div>
 
-  {/* Divider */}
-  <div className="h-9 w-px shrink-0 bg-[#dfe6e2] dark:bg-white/10" />
+            {/* Divider */}
+            <div className="h-9 w-px shrink-0 bg-[#dfe6e2] dark:bg-white/10" />
 
-  {/* Luas Wilayah */}
-  <div className="min-w-0">
-    <div
-      className="
-        text-[22px]
-        font-semibold
-        tracking-[-0.04em]
-        text-[#075b43]
-        dark:text-[#75c6a4]
-      "
-    >
-      4876,54 ha
-    </div>
+            {/* UMKM */}
+            <div className="min-w-0">
 
-    <div
-      className="
-        mt-0.5
-        text-[10px]
-        text-[#727b77]
-        dark:text-[#8fa099]
-      "
-    >
-      Luas Wilayah
-    </div>
-  </div>
-</div>
+              <div
+                className="
+                  text-[22px]
+                  font-semibold
+                  tracking-[-0.04em]
+                  text-[#075b43]
+                  dark:text-[#75c6a4]
+                "
+              >
+                {formatNumber(profile?.jumlahUmkm)}
+              </div>
+
+              <div
+                className="
+                  mt-0.5
+                  text-[10px]
+                  text-[#727b77]
+                  dark:text-[#8fa099]
+                "
+              >
+                UMKM Aktif
+              </div>
+
+            </div>
+
+            {/* Divider */}
+            <div className="h-9 w-px shrink-0 bg-[#dfe6e2] dark:bg-white/10" />
+
+            {/* Luas Wilayah */}
+            <div className="min-w-0">
+
+              <div
+                className="
+                  whitespace-nowrap
+                  text-[18px]
+                  font-semibold
+                  tracking-[-0.04em]
+                  text-[#075b43]
+                  dark:text-[#75c6a4]
+                  sm:text-[20px]
+                "
+              >
+                {formatArea(
+                  profile?.luasWilayah,
+                  profile?.satuanLuas
+                )}
+              </div>
+
+              <div
+                className="
+                  mt-0.5
+                  text-[10px]
+                  text-[#727b77]
+                  dark:text-[#8fa099]
+                "
+              >
+                Luas Wilayah
+              </div>
+
+            </div>
+
+          </div>
         </div>
       </div>
     </section>
