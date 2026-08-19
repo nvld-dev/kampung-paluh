@@ -1,21 +1,116 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #17201d;
+
+  --green-950: #003c2b;
+  --green-900: #004b36;
+  --green-800: #075b43;
+  --green-700: #176d53;
+  --green-600: #2e8066;
+  --green-100: #e9f1ed;
+
+  --muted: #69736f;
+  --border: #e5ebe7;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
+  color-scheme: light;
+}
+
+html.dark {
+  background: #0a110e;
+  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   margin: 0;
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+html.dark body {
+  background: #0a110e;
+  color: #edf5f0;
+}
+
+/* =========================================================
+   BASE ELEMENTS
+========================================================= */
+
+a {
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+  background: #cfe5da;
+  color: #003c2b;
+}
+
+html.dark ::selection {
+  background: #275b46;
+  color: #effff5;
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f4f2;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #b8c9c0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7fa595;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0d1713;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #315b4b;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #477b65;
 }
