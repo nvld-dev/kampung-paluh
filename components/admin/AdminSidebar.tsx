@@ -53,27 +53,6 @@ const menuItems = [
   },
 
   {
-    label: "Beranda",
-    href: "/admin/beranda",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 11.5L12 4L20 11.5V20H4V11.5Z"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 20V14H15V20"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-
-  {
     label: "Profil",
     href: "/admin/profil",
     icon: (
