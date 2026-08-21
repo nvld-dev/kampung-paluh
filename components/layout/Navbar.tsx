@@ -1,337 +1,157 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-const navigation = [
-  {
-    label: "Beranda",
-    href: "/",
-  },
-  {
-    label: "Profil Kampung",
-    href: "/profil",
-  },
-  {
-    label: "Kegiatan",
-    href: "/kegiatan",
-  },
-  {
-    label: "Produk Lokal",
-    href: "/umkm",
-  },
-  {
-    label: "Berita",
-    href: "/berita",
-  },
-];
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("kampung-paluh-theme");
-
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      setDarkMode(true);
-    } else if (savedTheme === "light") {
-      document.documentElement.classList.remove("dark");
-      setDarkMode(false);
-    } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-
-      if (prefersDark) {
-        document.documentElement.classList.add("dark");
-        setDarkMode(true);
-      }
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    const nextMode = !darkMode;
-
-    setDarkMode(nextMode);
-
-    if (nextMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("kampung-paluh-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("kampung-paluh-theme", "light");
-    }
-  };
+  const navItems = [
+    {
+      label: "Beranda",
+      href: "/",
+    },
+    {
+      label: "Profil Kampung",
+      href: "/profil",
+    },
+    {
+      label: "Kegiatan",
+      href: "/kegiatan",
+    },
+    {
+      label: "Produk Lokal",
+      href: "/produk",
+    },
+    {
+      label: "Berita",
+      href: "/berita",
+    },
+  ];
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto px-4 pt-3 sm:px-6 lg:px-8">
-        <nav className="mx-auto flex h-[68px] max-w-[1380px] items-center justify-between rounded-2xl border border-black/[0.06] bg-white/90 px-4 shadow-[0_8px_35px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-colors duration-300 dark:border-white/[0.08] dark:bg-[#0d1713]/90 dark:shadow-[0_8px_35px_rgba(0,0,0,0.25)] sm:px-5 lg:px-6">
+    <header className="fixed left-0 right-0 top-0 z-50 px-4 pt-4 sm:px-6">
+      <div className="mx-auto flex max-w-[1720px] items-center justify-between rounded-[22px] border border-black/[0.05] bg-white/95 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#101914]/95 sm:px-5">
 
-          {/* Brand */}
-          <a
-            href="/"
-            className="group flex shrink-0 items-center gap-3"
-            aria-label="Kampung Paluh"
-          >
-            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#e7f1eb] text-[#075b43] transition-all duration-300 group-hover:scale-105 group-hover:bg-[#dcebe3] dark:bg-[#163a2d] dark:text-[#75c6a4] dark:group-hover:bg-[#1c4939]">
-              <svg
-                width="21"
-                height="21"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 3C7.5 5.2 5 8.4 5 12.2C5 17 8.1 20 12 21C15.9 20 19 17 19 12.2C19 8.4 16.5 5.2 12 3Z"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                />
-                <path
-                  d="M8 14C10.2 13.5 12.2 12.4 13.8 10.7C15 9.4 15.8 8 16.2 6.6"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-
-            <div className="hidden sm:block">
-              <div className="text-[17px] font-semibold leading-none tracking-[-0.035em] text-[#103c30] dark:text-[#e9f5ef]">
-                Kampung Paluh
-              </div>
-
-              <div className="mt-1 text-[9px] font-medium uppercase tracking-[0.16em] text-[#7a8781] dark:text-[#82948b]">
-                Portal Promosi Kampung
-              </div>
-            </div>
-          </a>
-
-          {/* Desktop Navigation */}
-          <div className="hidden items-center lg:flex">
-            <div className="flex items-center gap-1 rounded-xl bg-[#f4f7f5] p-1 dark:bg-white/[0.045]">
-              {navigation.map((item, index) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={`relative rounded-lg px-4 py-2.5 text-[12px] font-medium transition-all duration-200 ${
-                    index === 0
-                      ? "bg-white text-[#075b43] shadow-[0_2px_10px_rgba(0,0,0,0.06)] dark:bg-[#193a2e] dark:text-[#9de0bf]"
-                      : "text-[#68756f] hover:bg-white/80 hover:text-[#075b43] dark:text-[#8d9c95] dark:hover:bg-white/[0.05] dark:hover:text-[#b5e7ce]"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop Actions */}
-          <div className="hidden items-center gap-2 lg:flex">
-
-            {/* Search */}
-            <button
-              type="button"
-              aria-label="Cari"
-              className="group flex h-10 w-10 items-center justify-center rounded-xl text-[#52615a] transition-all duration-200 hover:bg-[#eef4f0] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:bg-white/[0.06] dark:hover:text-[#a9e2c5]"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="6.5"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                />
-                <path
-                  d="M16 16L21 21"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-
-            <div className="mx-1 h-7 w-px bg-black/[0.08] dark:bg-white/[0.08]" />
-
-            {/* Dark Mode */}
-            <button
-              type="button"
-              onClick={toggleDarkMode}
-              aria-label={
-                darkMode
-                  ? "Aktifkan mode terang"
-                  : "Aktifkan mode gelap"
-              }
-              title={darkMode ? "Light mode" : "Dark mode"}
-              className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl text-[#52615a] transition-all duration-300 hover:bg-[#eef4f0] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:bg-white/[0.06] dark:hover:text-[#b5e7ce]"
-            >
-              {darkMode ? (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  />
-                  <path
-                    d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M20.5 15.2C19.5 15.7 18.4 16 17.2 16C13.1 16 9.8 12.7 9.8 8.6C9.8 7.4 10.1 6.3 10.6 5.3C6.7 6 3.7 9.4 3.7 13.5C3.7 18.1 7.4 21.8 7.4 13.5C7.4 18.1 11.1 21.8 15.7 21.8C17.8 21.8 19.7 21 20.5 15.2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Mobile Actions */}
-          <div className="flex items-center gap-1 lg:hidden">
-
-            {/* Dark Mode */}
-            <button
-              type="button"
-              onClick={toggleDarkMode}
-              aria-label={
-                darkMode
-                  ? "Aktifkan mode terang"
-                  : "Aktifkan mode gelap"
-              }
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-[#52615a] transition-colors hover:bg-[#eef4f0] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:bg-white/[0.06]"
-            >
-              {darkMode ? (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  />
-                  <path
-                    d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M20.5 15.2C19.5 15.7 18.4 16 17.2 16C13.1 16 9.8 12.7 9.8 8.6C9.8 7.4 10.1 6.3 10.6 5.3C6.7 6 3.7 9.4 3.7 13.5C3.7 18.1 7.4 21.8 12 21.8C16.1 21.8 19.5 18.8 20.5 15.2Z"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </button>
-
-            {/* Hamburger */}
-            <button
-              type="button"
-              aria-label={isOpen ? "Tutup menu" : "Buka menu"}
-              onClick={() => setIsOpen(!isOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-[#52615a] transition-colors hover:bg-[#eef4f0] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:bg-white/[0.06]"
-            >
-              {isOpen ? (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M6 6L18 18M18 6L6 18"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M4 7H20M4 12H20M4 17H20"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-        </nav>
-
-        {/* Mobile Menu */}
-        <div
-          className={`mx-auto mt-2 max-w-[1380px] overflow-hidden rounded-2xl border border-black/[0.06] bg-white/95 shadow-xl backdrop-blur-xl transition-all duration-300 dark:border-white/[0.08] dark:bg-[#0d1713]/95 ${
-            isOpen
-              ? "max-h-[500px] translate-y-0 opacity-100"
-              : "pointer-events-none max-h-0 -translate-y-2 opacity-0"
-          }`}
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-3"
         >
-          <div className="p-3">
-            {navigation.map((item, index) => (
-              <a
+          <div className="flex h-12 w-12 items-center justify-center rounded-[15px] bg-[#e9f1ed] text-[#075b43] dark:bg-[#193a2e] dark:text-[#9de0bf]">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19.5 4.5C14 4.5 8 6.5 6 11.5C4.4 15.5 6.5 19.5 10.5 20C14.5 20.5 18 17.5 19.5 13C20.5 10 20 7 19.5 4.5Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M5 19C8 16 11 13 17 10"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          <div className="hidden sm:block">
+            <div className="text-[17px] font-semibold tracking-[-0.02em] text-[#173d31] dark:text-[#edf5f0]">
+              Kampung Paluh
+            </div>
+
+            <div className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.18em] text-[#7b8983] dark:text-[#82958c]">
+              Portal Promosi Kampung
+            </div>
+          </div>
+        </Link>
+
+        {/* Navigation */}
+        <nav className="hidden items-center gap-1 rounded-[16px] bg-[#f4f7f5] p-1 lg:flex dark:bg-[#16231d]">
+          {navItems.map((item) => {
+            const isActive =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+
+            return (
+              <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-4 py-3.5 text-sm font-medium transition-colors ${
-                  index === 0
-                    ? "bg-[#e9f1ed] text-[#075b43] dark:bg-[#173a2d] dark:text-[#a8e2c3]"
-                    : "text-[#56635d] hover:bg-[#f2f6f3] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:bg-white/[0.05] dark:hover:text-[#b5e7ce]"
+                className={`rounded-[12px] px-5 py-3 text-[12px] font-medium transition-all duration-300 ${
+                  isActive
+                    ? "bg-white text-[#075b43] shadow-[0_3px_12px_rgba(0,0,0,0.05)] dark:bg-[#21352c] dark:text-[#9de0bf]"
+                    : "text-[#68736e] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:text-[#9de0bf]"
                 }`}
               >
-                <span>{item.label}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-                {index === 0 && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#2e8066]" />
-                )}
-              </a>
-            ))}
-          </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {/* Search */}
+          <button
+            type="button"
+            aria-label="Pencarian"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[#64716b] transition-colors hover:bg-[#f1f5f3] hover:text-[#075b43] dark:text-[#a0afa8] dark:hover:bg-[#192820]"
+          >
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="6.5"
+                stroke="currentColor"
+                strokeWidth="1.7"
+              />
+              <path
+                d="M16 16L20 20"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+
+          <div className="hidden h-7 w-px bg-[#dce3df] sm:block dark:bg-[#293a32]" />
+
+          {/* Theme */}
+          <button
+            type="button"
+            aria-label="Ubah tema"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[#64716b] transition-colors hover:bg-[#f1f5f3] hover:text-[#075b43] dark:text-[#a0afa8] dark:hover:bg-[#192820]"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 15.5C18.9 16 17.7 16.3 16.5 16.3C11.8 16.3 8 12.5 8 7.8C8 6.5 8.3 5.3 8.8 4.2C5.5 5.5 3.2 8.7 3.2 12.4C3.2 17.2 7.1 21 11.8 21C15.5 21 18.7 18.8 20 15.5Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </header>

@@ -17,34 +17,27 @@ const initialForm: EventData = {
   tanggal: "",
   waktu: "",
   lokasi: "",
-  foto: "",
+  foto: [],
   status: "aktif",
 };
 
 export default function KegiatanAdminPage() {
-  const [events, setEvents] =
-    useState<EventData[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [form, setForm] = useState<EventData>(initialForm);
 
-  const [form, setForm] =
-    useState<EventData>(initialForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [editingId, setEditingId] =
-    useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [showForm, setShowForm] = useState(false);
 
-  const [saving, setSaving] =
-    useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [showForm, setShowForm] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [message, setMessage] =
-    useState("");
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
 
   useEffect(() => {
     loadEvents();
@@ -72,6 +65,10 @@ export default function KegiatanAdminPage() {
     }
   }
 
+  /* =========================================================
+     SLUG
+  ========================================================= */
+
   function createSlug(value: string) {
     return value
       .toLowerCase()
@@ -80,6 +77,10 @@ export default function KegiatanAdminPage() {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-");
   }
+
+  /* =========================================================
+     FORM CHANGE
+  ========================================================= */
 
   function handleChange(
     event: React.ChangeEvent<
@@ -108,13 +109,60 @@ export default function KegiatanAdminPage() {
     }));
   }
 
+  /* =========================================================
+     FOTO
+  ========================================================= */
+
+  function addPhoto() {
+    setForm((previous) => ({
+      ...previous,
+      foto: [...previous.foto, ""],
+    }));
+  }
+
+  function updatePhoto(
+    index: number,
+    value: string
+  ) {
+    setForm((previous) => ({
+      ...previous,
+      foto: previous.foto.map((photo, photoIndex) =>
+        photoIndex === index
+          ? value
+          : photo
+      ),
+    }));
+  }
+
+  function removePhoto(index: number) {
+    setForm((previous) => ({
+      ...previous,
+      foto: previous.foto.filter(
+        (_, photoIndex) =>
+          photoIndex !== index
+      ),
+    }));
+  }
+
+  /* =========================================================
+     CREATE
+  ========================================================= */
+
   function openCreate() {
-    setForm(initialForm);
+    setForm({
+      ...initialForm,
+      foto: [],
+    });
+
     setEditingId(null);
     setMessage("");
     setError("");
     setShowForm(true);
   }
+
+  /* =========================================================
+     EDIT
+  ========================================================= */
 
   function openEdit(item: EventData) {
     setForm({
@@ -124,7 +172,14 @@ export default function KegiatanAdminPage() {
       tanggal: item.tanggal ?? "",
       waktu: item.waktu ?? "",
       lokasi: item.lokasi ?? "",
-      foto: item.foto ?? "",
+
+      // Mendukung data lama maupun data baru
+      foto: Array.isArray(item.foto)
+        ? item.foto
+        : item.foto
+          ? [item.foto]
+          : [],
+
       status: item.status ?? "aktif",
     });
 
@@ -134,11 +189,23 @@ export default function KegiatanAdminPage() {
     setShowForm(true);
   }
 
+  /* =========================================================
+     CLOSE
+  ========================================================= */
+
   function closeForm() {
     setShowForm(false);
     setEditingId(null);
-    setForm(initialForm);
+
+    setForm({
+      ...initialForm,
+      foto: [],
+    });
   }
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -169,20 +236,33 @@ export default function KegiatanAdminPage() {
       return;
     }
 
+    /*
+     * Hapus URL kosong agar Firestore
+     * hanya menyimpan foto yang benar-benar ada.
+     */
+    const cleanedPhotos = form.foto
+      .map((photo) => photo.trim())
+      .filter(Boolean);
+
+    const eventData: EventData = {
+      ...form,
+      foto: cleanedPhotos,
+    };
+
     try {
       setSaving(true);
 
       if (editingId) {
         await updateEvent(
           editingId,
-          form
+          eventData
         );
 
         setMessage(
           "Kegiatan berhasil diperbarui."
         );
       } else {
-        await createEvent(form);
+        await createEvent(eventData);
 
         setMessage(
           "Kegiatan berhasil ditambahkan."
@@ -205,6 +285,10 @@ export default function KegiatanAdminPage() {
       setSaving(false);
     }
   }
+
+  /* =========================================================
+     DELETE
+  ========================================================= */
 
   async function handleDelete(
     item: EventData
@@ -240,9 +324,11 @@ export default function KegiatanAdminPage() {
     }
   }
 
-  function formatDate(
-    date: string
-  ) {
+  /* =========================================================
+     FORMAT DATE
+  ========================================================= */
+
+  function formatDate(date: string) {
     if (!date) return "-";
 
     return new Date(
@@ -256,6 +342,10 @@ export default function KegiatanAdminPage() {
       }
     );
   }
+
+  /* =========================================================
+     RETURN
+  ========================================================= */
 
   return (
     <div className="p-6 lg:p-8">
@@ -305,7 +395,6 @@ export default function KegiatanAdminPage() {
 
           Tambah Kegiatan
         </button>
-
       </div>
 
       {/* ALERT */}
@@ -481,165 +570,178 @@ export default function KegiatanAdminPage() {
               </thead>
 
               <tbody>
-                {events.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-[#f0f3f1] last:border-b-0 hover:bg-[#fbfcfb]"
-                  >
+                {events.map((item) => {
 
-                    {/* Kegiatan */}
+                  const firstPhoto =
+                    Array.isArray(item.foto)
+                      ? item.foto[0]
+                      : "";
 
-                    <td className="px-6 py-4">
+                  return (
+                    <tr
+                      key={item.id}
+                      className="border-b border-[#f0f3f1] last:border-b-0 hover:bg-[#fbfcfb]"
+                    >
 
-                      <div className="flex items-center gap-3">
+                      {/* KEGIATAN */}
 
-                        <div className="h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-[#e9f1ed]">
+                      <td className="px-6 py-4">
 
-                          {item.foto ? (
-                            <img
-                              src={item.foto}
-                              alt={item.judul}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[#75a28f]">
+                        <div className="flex items-center gap-3">
 
-                              <svg
-                                width="19"
-                                height="19"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                              >
-                                <rect
-                                  x="4"
-                                  y="4"
-                                  width="16"
-                                  height="16"
-                                  rx="2"
-                                  stroke="currentColor"
-                                  strokeWidth="1.6"
-                                />
+                          <div className="h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-[#e9f1ed]">
 
-                                <circle
-                                  cx="9"
-                                  cy="9"
-                                  r="1.5"
-                                  stroke="currentColor"
-                                  strokeWidth="1.5"
-                                />
+                            {firstPhoto ? (
+                              <img
+                                src={firstPhoto}
+                                alt={item.judul}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[#75a28f]">
+                                <svg
+                                  width="19"
+                                  height="19"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                >
+                                  <rect
+                                    x="4"
+                                    y="4"
+                                    width="16"
+                                    height="16"
+                                    rx="2"
+                                    stroke="currentColor"
+                                    strokeWidth="1.6"
+                                  />
 
-                                <path
-                                  d="M5 17L10 12L13 15L15 13L19 17"
-                                  stroke="currentColor"
-                                  strokeWidth="1.6"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                                  <circle
+                                    cx="9"
+                                    cy="9"
+                                    r="1.5"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                  />
 
+                                  <path
+                                    d="M5 17L10 12L13 15L15 13L19 17"
+                                    stroke="currentColor"
+                                    strokeWidth="1.6"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+
+                          </div>
+
+                          <div className="min-w-0">
+
+                            <div className="max-w-[230px] truncate text-[12px] font-semibold text-[#27322e]">
+                              {item.judul}
                             </div>
-                          )}
+
+                            <div className="mt-1 max-w-[230px] truncate text-[10px] text-[#9aa39f]">
+                              {item.deskripsi ||
+                                "Deskripsi belum tersedia"}
+                            </div>
+
+                            <div className="mt-1 text-[9px] text-[#9aa39f]">
+                              {Array.isArray(item.foto)
+                                ? item.foto.length
+                                : 0}{" "}
+                              foto
+                            </div>
+
+                          </div>
 
                         </div>
 
-                        <div className="min-w-0">
+                      </td>
 
-                          <div className="max-w-[230px] truncate text-[12px] font-semibold text-[#27322e]">
-                            {item.judul}
-                          </div>
+                      {/* TANGGAL */}
 
-                          <div className="mt-1 max-w-[230px] truncate text-[10px] text-[#9aa39f]">
-                            {item.deskripsi ||
-                              "Deskripsi belum tersedia"}
-                          </div>
+                      <td className="px-4 py-4 text-[11px] font-medium text-[#53615b]">
+                        {formatDate(
+                          item.tanggal
+                        )}
+                      </td>
+
+                      {/* WAKTU */}
+
+                      <td className="px-4 py-4 text-[11px] text-[#68736e]">
+                        {item.waktu || "-"}
+                      </td>
+
+                      {/* LOKASI */}
+
+                      <td className="px-4 py-4 text-[11px] text-[#68736e]">
+                        <div className="max-w-[180px] truncate">
+                          {item.lokasi}
+                        </div>
+                      </td>
+
+                      {/* STATUS */}
+
+                      <td className="px-4 py-4">
+
+                        <span
+                          className={`
+                            rounded-full
+                            px-2.5
+                            py-1
+                            text-[9px]
+                            font-semibold
+                            ${
+                              item.status ===
+                              "aktif"
+                                ? "bg-[#e9f5ed] text-[#28714b]"
+                                : "bg-[#f3eeee] text-[#8a625d]"
+                            }
+                          `}
+                        >
+                          {item.status ===
+                          "aktif"
+                            ? "Aktif"
+                            : "Nonaktif"}
+                        </span>
+
+                      </td>
+
+                      {/* AKSI */}
+
+                      <td className="px-6 py-4">
+
+                        <div className="flex justify-end gap-2">
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openEdit(item)
+                            }
+                            className="rounded-lg border border-[#dfe6e2] px-3 py-2 text-[10px] font-semibold text-[#53615b] hover:bg-[#f5f8f6] hover:text-[#075b43]"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(item)
+                            }
+                            className="rounded-lg border border-[#eadbd8] px-3 py-2 text-[10px] font-semibold text-[#9a625d] hover:bg-[#fff5f3]"
+                          >
+                            Hapus
+                          </button>
 
                         </div>
 
-                      </div>
+                      </td>
 
-                    </td>
-
-                    {/* Tanggal */}
-
-                    <td className="px-4 py-4 text-[11px] font-medium text-[#53615b]">
-                      {formatDate(
-                        item.tanggal
-                      )}
-                    </td>
-
-                    {/* Waktu */}
-
-                    <td className="px-4 py-4 text-[11px] text-[#68736e]">
-                      {item.waktu || "-"}
-                    </td>
-
-                    {/* Lokasi */}
-
-                    <td className="px-4 py-4 text-[11px] text-[#68736e]">
-                      <div className="max-w-[180px] truncate">
-                        {item.lokasi}
-                      </div>
-                    </td>
-
-                    {/* Status */}
-
-                    <td className="px-4 py-4">
-
-                      <span
-                        className={`
-                          rounded-full
-                          px-2.5
-                          py-1
-                          text-[9px]
-                          font-semibold
-                          ${
-                            item.status ===
-                            "aktif"
-                              ? "bg-[#e9f5ed] text-[#28714b]"
-                              : "bg-[#f3eeee] text-[#8a625d]"
-                          }
-                        `}
-                      >
-                        {item.status ===
-                        "aktif"
-                          ? "Aktif"
-                          : "Nonaktif"}
-                      </span>
-
-                    </td>
-
-                    {/* Aksi */}
-
-                    <td className="px-6 py-4">
-
-                      <div className="flex justify-end gap-2">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openEdit(item)
-                          }
-                          className="rounded-lg border border-[#dfe6e2] px-3 py-2 text-[10px] font-semibold text-[#53615b] hover:bg-[#f5f8f6] hover:text-[#075b43]"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(item)
-                          }
-                          className="rounded-lg border border-[#eadbd8] px-3 py-2 text-[10px] font-semibold text-[#9a625d] hover:bg-[#fff5f3]"
-                        >
-                          Hapus
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
 
             </table>
@@ -658,12 +760,11 @@ export default function KegiatanAdminPage() {
 
           <div className="flex max-h-[90vh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-            {/* Header */}
+            {/* HEADER */}
 
             <div className="flex items-center justify-between border-b border-[#e5ebe7] px-6 py-5">
 
               <div>
-
                 <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#2e8066]">
                   {editingId
                     ? "Edit Data"
@@ -675,7 +776,6 @@ export default function KegiatanAdminPage() {
                     ? "Edit Kegiatan"
                     : "Tambah Kegiatan"}
                 </h2>
-
               </div>
 
               <button
@@ -688,7 +788,7 @@ export default function KegiatanAdminPage() {
 
             </div>
 
-            {/* Form */}
+            {/* FORM */}
 
             <form
               onSubmit={handleSubmit}
@@ -697,10 +797,9 @@ export default function KegiatanAdminPage() {
 
               <div className="grid gap-5 p-6">
 
-                {/* Judul */}
+                {/* JUDUL */}
 
                 <div>
-
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Judul Kegiatan
                   </label>
@@ -708,20 +807,16 @@ export default function KegiatanAdminPage() {
                   <input
                     name="judul"
                     value={form.judul}
-                    onChange={
-                      handleTitleChange
-                    }
+                    onChange={handleTitleChange}
                     placeholder="Contoh: Rewang Riang"
                     required
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   />
-
                 </div>
 
-                {/* Slug */}
+                {/* SLUG */}
 
                 <div>
-
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Slug
                   </label>
@@ -738,15 +833,13 @@ export default function KegiatanAdminPage() {
                     Slug dibuat otomatis dari
                     judul dan dapat diedit.
                   </p>
-
                 </div>
 
-                {/* Tanggal + Waktu */}
+                {/* TANGGAL + WAKTU */}
 
                 <div className="grid gap-5 sm:grid-cols-2">
 
                   <div>
-
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       Tanggal
                     </label>
@@ -759,11 +852,9 @@ export default function KegiatanAdminPage() {
                       required
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     />
-
                   </div>
 
                   <div>
-
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       Waktu
                     </label>
@@ -776,15 +867,13 @@ export default function KegiatanAdminPage() {
                       placeholder="Contoh: 08.00 - 12.00 WIB"
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     />
-
                   </div>
 
                 </div>
 
-                {/* Lokasi */}
+                {/* LOKASI */}
 
                 <div>
-
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Lokasi
                   </label>
@@ -797,34 +886,28 @@ export default function KegiatanAdminPage() {
                     required
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   />
-
                 </div>
 
-                {/* Deskripsi */}
+                {/* DESKRIPSI */}
 
                 <div>
-
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Deskripsi Kegiatan
                   </label>
 
                   <textarea
                     name="deskripsi"
-                    value={
-                      form.deskripsi
-                    }
+                    value={form.deskripsi}
                     onChange={handleChange}
                     rows={5}
                     placeholder="Jelaskan kegiatan..."
                     className="w-full resize-y rounded-xl border border-[#dfe6e2] bg-white px-4 py-3 text-[13px] leading-[1.7] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   />
-
                 </div>
 
-                {/* Status */}
+                {/* STATUS */}
 
                 <div>
-
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Status
                   </label>
@@ -835,7 +918,6 @@ export default function KegiatanAdminPage() {
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   >
-
                     <option value="aktif">
                       Aktif
                     </option>
@@ -843,49 +925,135 @@ export default function KegiatanAdminPage() {
                     <option value="nonaktif">
                       Nonaktif
                     </option>
-
                   </select>
-
                 </div>
 
-                {/* Foto */}
+                {/* =====================================================
+                    FOTO KEGIATAN
+                ====================================================== */}
 
                 <div>
 
-                  <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
-                    URL Foto
-                  </label>
+                  <div className="flex items-center justify-between gap-4">
 
-                  <input
-                    name="foto"
-                    value={form.foto}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                    className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
-                  />
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#37413d]">
+                        Foto Kegiatan
+                      </label>
 
-                  <p className="mt-2 text-[10px] text-[#9aa39f]">
-                    Upload Firebase Storage
-                    akan ditambahkan nanti.
-                  </p>
-
-                  {form.foto && (
-                    <div className="mt-3 h-36 overflow-hidden rounded-xl bg-[#edf2ef]">
-
-                      <img
-                        src={form.foto}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                      />
-
+                      <p className="mt-1 text-[10px] text-[#9aa39f]">
+                        Tambahkan beberapa URL foto
+                        untuk satu kegiatan.
+                      </p>
                     </div>
-                  )}
+
+                    <button
+                      type="button"
+                      onClick={addPhoto}
+                      className="shrink-0 rounded-lg bg-[#e9f1ed] px-3 py-2 text-[10px] font-semibold text-[#075b43] transition hover:bg-[#dcebe3]"
+                    >
+                      + Tambah Foto
+                    </button>
+
+                  </div>
+
+                  <div className="mt-4 grid gap-3">
+
+                    {form.foto.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-[#d8e2dc] bg-[#fafcfb] px-4 py-5 text-center">
+                        <p className="text-[11px] text-[#8a9490]">
+                          Belum ada foto.
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={addPhoto}
+                          className="mt-2 text-[10px] font-semibold text-[#075b43] hover:underline"
+                        >
+                          Tambahkan foto pertama
+                        </button>
+                      </div>
+                    ) : (
+                      form.foto.map(
+                        (photo, index) => (
+                          <div
+                            key={index}
+                            className="rounded-xl border border-[#e0e7e3] bg-[#fafcfb] p-3"
+                          >
+
+                            <div className="flex gap-3">
+
+                              <div className="flex-1">
+
+                                <div className="mb-2 flex items-center justify-between">
+
+                                  <span className="text-[10px] font-semibold text-[#59645f]">
+                                    Foto{" "}
+                                    {index + 1}
+                                  </span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removePhoto(
+                                        index
+                                      )
+                                    }
+                                    className="text-[10px] font-semibold text-[#a15f5a] hover:underline"
+                                  >
+                                    Hapus
+                                  </button>
+
+                                </div>
+
+                                <input
+                                  type="url"
+                                  value={photo}
+                                  onChange={(event) =>
+                                    updatePhoto(
+                                      index,
+                                      event.target
+                                        .value
+                                    )
+                                  }
+                                  placeholder="https://..."
+                                  className="h-11 w-full rounded-lg border border-[#dfe6e2] bg-white px-3 text-[12px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
+                                />
+
+                              </div>
+
+                            </div>
+
+                            {photo.trim() && (
+                              <div className="mt-3 h-32 overflow-hidden rounded-lg bg-[#edf2ef]">
+
+                                <img
+                                  src={photo}
+                                  alt={`Preview foto ${
+                                    index + 1
+                                  }`}
+                                  className="h-full w-full object-cover"
+                                  onError={(event) => {
+                                    event.currentTarget.style.display =
+                                      "none";
+                                  }}
+                                />
+
+                              </div>
+                            )}
+
+                          </div>
+                        )
+                      )
+                    )}
+
+                  </div>
 
                 </div>
 
               </div>
 
-              {/* Footer */}
+              {/* FOOTER */}
 
               <div className="flex justify-end gap-3 border-t border-[#edf1ef] bg-[#fafcfb] px-6 py-4">
 

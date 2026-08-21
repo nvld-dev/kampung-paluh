@@ -192,22 +192,7 @@ export default function AboutSection() {
             </>
           )}
 
-          {/* Sejarah Singkat */}
-          {profile?.sejarahSingkat && (
-            <p
-              className="
-                mt-4
-                text-[15px]
-                leading-[1.8]
-                text-[#68716d]
-                transition-colors duration-500
-                dark:text-[#9eaea6]
-              "
-            >
-              {profile.sejarahSingkat}
-            </p>
-          )}
-
+          
           {/* Link */}
           <a
             href="/profil"

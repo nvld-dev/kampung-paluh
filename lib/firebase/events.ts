@@ -20,13 +20,20 @@ export interface EventData {
   judul: string;
   slug: string;
   deskripsi: string;
+
   tanggal: string;
   waktu: string;
   lokasi: string;
-  foto: string;
+
+  // Satu kegiatan dapat memiliki banyak foto
+  foto: string[];
 
   status: "aktif" | "nonaktif";
 }
+
+/* =========================================================
+   GET ALL EVENTS
+========================================================= */
 
 export async function getEvents(): Promise<EventData[]> {
   const eventsRef = collection(
@@ -41,11 +48,38 @@ export async function getEvents(): Promise<EventData[]> {
 
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((item) => ({
-    id: item.id,
-    ...(item.data() as Omit<EventData, "id">),
-  }));
+  return snapshot.docs.map((item) => {
+    const data = item.data();
+
+    return {
+      id: item.id,
+
+      judul: data.judul ?? "",
+      slug: data.slug ?? "",
+      deskripsi: data.deskripsi ?? "",
+
+      tanggal: data.tanggal ?? "",
+      waktu: data.waktu ?? "",
+      lokasi: data.lokasi ?? "",
+
+      // Pastikan selalu berupa array
+      foto: Array.isArray(data.foto)
+        ? data.foto
+        : data.foto
+          ? [data.foto]
+          : [],
+
+      status:
+        data.status === "nonaktif"
+          ? "nonaktif"
+          : "aktif",
+    };
+  });
 }
+
+/* =========================================================
+   CREATE EVENT
+========================================================= */
 
 export async function createEvent(
   data: EventData
@@ -59,10 +93,14 @@ export async function createEvent(
     judul: data.judul,
     slug: data.slug,
     deskripsi: data.deskripsi,
+
     tanggal: data.tanggal,
     waktu: data.waktu,
     lokasi: data.lokasi,
+
+    // Simpan semua foto sebagai array
     foto: data.foto,
+
     status: data.status,
 
     createdAt: serverTimestamp(),
@@ -71,6 +109,10 @@ export async function createEvent(
 
   return document.id;
 }
+
+/* =========================================================
+   UPDATE EVENT
+========================================================= */
 
 export async function updateEvent(
   id: string,
@@ -86,15 +128,23 @@ export async function updateEvent(
     judul: data.judul,
     slug: data.slug,
     deskripsi: data.deskripsi,
+
     tanggal: data.tanggal,
     waktu: data.waktu,
     lokasi: data.lokasi,
+
+    // Update semua foto
     foto: data.foto,
+
     status: data.status,
 
     updatedAt: serverTimestamp(),
   });
 }
+
+/* =========================================================
+   DELETE EVENT
+========================================================= */
 
 export async function deleteEvent(
   id: string

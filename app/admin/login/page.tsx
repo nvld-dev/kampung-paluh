@@ -1,14 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import {
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
 import { auth } from "@/lib/firebase/auth";
@@ -45,11 +39,9 @@ export default function AdminLoginPage() {
 
       if (!adminSnapshot.exists()) {
         await signOut(auth);
-
         setError(
           "Akun berhasil login, tetapi tidak terdaftar sebagai administrator."
         );
-
         return;
       }
 
@@ -58,126 +50,68 @@ export default function AdminLoginPage() {
       // Cek status akun
       if (adminData.aktif !== true) {
         await signOut(auth);
-
         setError("Akun administrator sedang tidak aktif.");
-
         return;
       }
 
       // Cek role
       if (adminData.role !== "admin") {
         await signOut(auth);
-
         setError("Akun tidak memiliki akses ke CMS.");
-
         return;
       }
 
       // Berhasil
       router.replace("/admin");
     } catch (error: any) {
-  console.error("LOGIN ERROR:", error);
+      console.error("LOGIN ERROR:", error);
 
-  switch (error.code) {
-    case "auth/invalid-credential":
-      setError("Email atau password salah.");
-      break;
+      switch (error.code) {
+        case "auth/invalid-credential":
+          setError("Email atau password salah.");
+          break;
 
-    case "auth/user-not-found":
-      setError("Akun administrator tidak ditemukan.");
-      break;
+        case "auth/user-not-found":
+          setError("Akun administrator tidak ditemukan.");
+          break;
 
-    case "auth/wrong-password":
-      setError("Password yang dimasukkan salah.");
-      break;
+        case "auth/wrong-password":
+          setError("Password yang dimasukkan salah.");
+          break;
 
-    case "auth/invalid-email":
-      setError("Format email tidak valid.");
-      break;
+        case "auth/invalid-email":
+          setError("Format email tidak valid.");
+          break;
 
-    case "auth/too-many-requests":
-      setError(
-        "Terlalu banyak percobaan login. Silakan coba lagi nanti."
-      );
-      break;
+        case "auth/too-many-requests":
+          setError("Terlalu banyak percobaan login. Silakan coba lagi nanti.");
+          break;
 
-    default:
-      setError(
-        "Terjadi kesalahan saat login. Silakan coba lagi."
-      );
-  }
-} finally {
-  setLoading(false);
-}
+        default:
+          setError("Terjadi kesalahan saat login. Silakan coba lagi.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <main className="min-h-screen bg-[#f5f8f6]">
       <div className="flex min-h-screen">
-
-        {/* =====================================================
-            LEFT — BRANDING
-        ====================================================== */}
-        <section
-          className="
-            relative
-            hidden
-            overflow-hidden
-            bg-[#003c2b]
-            lg:flex
-            lg:w-[52%]
-          "
-        >
+        {/* LEFT — BRANDING */}
+        <section className="relative hidden overflow-hidden bg-[#003c2b] lg:flex lg:w-[52%]">
           {/* Decorative background */}
           <div className="absolute inset-0">
-            <div
-              className="
-                absolute
-                -left-32
-                -top-32
-                h-[420px]
-                w-[420px]
-                rounded-full
-                bg-[#075b43]
-                opacity-40
-                blur-3xl
-              "
-            />
-
-            <div
-              className="
-                absolute
-                -bottom-40
-                -right-20
-                h-[500px]
-                w-[500px]
-                rounded-full
-                bg-[#176d53]
-                opacity-25
-                blur-3xl
-              "
-            />
+            <div className="absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full bg-[#075b43] opacity-40 blur-3xl" />
+            <div className="absolute -bottom-40 -right-20 h-[500px] w-[500px] rounded-full bg-[#176d53] opacity-25 blur-3xl" />
           </div>
 
           {/* Content */}
           <div className="relative flex w-full flex-col justify-between p-12 xl:p-16">
-
             {/* Logo / Brand */}
             <div>
               <div className="flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-11
-                    w-11
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-white/10
-                    text-white
-                    backdrop-blur
-                  "
-                >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur">
                   <svg
                     width="22"
                     height="22"
@@ -190,7 +124,6 @@ export default function AdminLoginPage() {
                       stroke="currentColor"
                       strokeWidth="1.7"
                     />
-
                     <path
                       d="M8 14C10.2 13.5 12.2 12.4 13.8 10.7C15 9.4 15.8 8 16.2 6.6"
                       stroke="currentColor"
@@ -218,25 +151,16 @@ export default function AdminLoginPage() {
                 Administrator
               </div>
 
-              <h1
-                className="
-                  text-[42px]
-                  font-semibold
-                  leading-[1.05]
-                  tracking-[-0.05em]
-                  text-white
-                  xl:text-[54px]
-                "
-              >
+              <h1 className="text-[42px] font-semibold leading-[1.05] tracking-[-0.05em] text-white xl:text-[54px]">
                 Kelola informasi
                 <br />
                 Kampung Paluh.
               </h1>
 
               <p className="mt-6 max-w-[470px] text-[14px] leading-[1.8] text-white/55">
-                Kelola profil kampung, UMKM, produk lokal,
-                kegiatan masyarakat, serta cerita dan berita
-                melalui satu panel administrasi.
+                Kelola profil kampung, UMKM, produk lokal, kegiatan
+                masyarakat, serta cerita dan berita melalui satu panel
+                administrasi.
               </p>
             </div>
 
@@ -247,12 +171,9 @@ export default function AdminLoginPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            RIGHT — LOGIN FORM
-        ====================================================== */}
+        {/* RIGHT — LOGIN FORM */}
         <section className="flex w-full items-center justify-center px-6 py-12 lg:w-[48%]">
           <div className="w-full max-w-[420px]">
-
             {/* Mobile brand */}
             <div className="mb-12 lg:hidden">
               <div className="text-[20px] font-semibold tracking-[-0.03em] text-[#003c2b]">
@@ -281,29 +202,13 @@ export default function AdminLoginPage() {
 
             {/* Error */}
             {error && (
-              <div
-                className="
-                  mt-7
-                  rounded-xl
-                  border
-                  border-red-200
-                  bg-red-50
-                  px-4
-                  py-3
-                  text-[12px]
-                  leading-[1.6]
-                  text-red-700
-                "
-              >
+              <div className="mt-7 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] leading-[1.6] text-red-700">
                 {error}
               </div>
             )}
 
             {/* Form */}
-            <form
-              onSubmit={handleLogin}
-              className="mt-8 space-y-5"
-            >
+            <form onSubmit={handleLogin} className="mt-8 space-y-5">
               {/* Email */}
               <div>
                 <label
@@ -317,29 +222,11 @@ export default function AdminLoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
+                  onChange={(event) => setEmail(event.target.value)}
                   placeholder="admin@kampungpaluh.id"
                   autoComplete="email"
                   required
-                  className="
-                    h-12
-                    w-full
-                    rounded-xl
-                    border
-                    border-[#dfe6e2]
-                    bg-white
-                    px-4
-                    text-[13px]
-                    text-[#17201d]
-                    outline-none
-                    transition-all
-                    placeholder:text-[#a2aaa6]
-                    focus:border-[#075b43]
-                    focus:ring-4
-                    focus:ring-[#075b43]/10
-                  "
+                  className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none transition-all placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                 />
               </div>
 
@@ -356,29 +243,11 @@ export default function AdminLoginPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="Masukkan password"
                   autoComplete="current-password"
                   required
-                  className="
-                    h-12
-                    w-full
-                    rounded-xl
-                    border
-                    border-[#dfe6e2]
-                    bg-white
-                    px-4
-                    text-[13px]
-                    text-[#17201d]
-                    outline-none
-                    transition-all
-                    placeholder:text-[#a2aaa6]
-                    focus:border-[#075b43]
-                    focus:ring-4
-                    focus:ring-[#075b43]/10
-                  "
+                  className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none transition-all placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                 />
               </div>
 
@@ -386,46 +255,16 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="
-                  flex
-                  h-12
-                  w-full
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-xl
-                  bg-[#003c2b]
-                  text-[13px]
-                  font-semibold
-                  text-white
-                  shadow-[0_10px_30px_rgba(0,60,43,0.12)]
-                  transition-all
-                  hover:bg-[#075b43]
-                  hover:shadow-[0_14px_35px_rgba(0,60,43,0.16)]
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                "
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#003c2b] text-[13px] font-semibold text-white shadow-[0_10px_30px_rgba(0,60,43,0.12)] transition-all hover:bg-[#075b43] hover:shadow-[0_14px_35px_rgba(0,60,43,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? (
                   <>
-                    <span
-                      className="
-                        h-4
-                        w-4
-                        animate-spin
-                        rounded-full
-                        border-2
-                        border-white/30
-                        border-t-white
-                      "
-                    />
-
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Memproses...
                   </>
                 ) : (
                   <>
                     Masuk ke CMS
-
                     <span>→</span>
                   </>
                 )}
