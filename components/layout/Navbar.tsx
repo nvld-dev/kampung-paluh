@@ -21,7 +21,7 @@ export default function Navbar() {
     },
     {
       label: "Produk Lokal",
-      href: "/produk",
+      href: "/umkm",
     },
     {
       label: "Berita",
