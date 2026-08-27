@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LeafletMap from "./LeafletMap";
 
 import { getProfile, ProfileData } from "@/lib/firebase/profile";
 
@@ -81,16 +82,25 @@ export default function ProfilPage() {
       <Navbar />
 
       <main>
-        {/* =========================================================
-            HERO
-        ========================================================== */}
-        <section className="relative overflow-hidden bg-white pt-32 dark:bg-[#0a110e] lg:pt-40">
-          {/* Decorative */}
-          <div className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-[#dfeee7] blur-3xl dark:bg-[#123326]" />
-          <div className="pointer-events-none absolute -left-40 bottom-0 h-[300px] w-[300px] rounded-full bg-[#edf5f1] blur-3xl dark:bg-[#10271e]" />
+      {/* =========================================================
+          HERO
+      ========================================================= */}
 
-          <div className="relative mx-auto max-w-[1320px] px-6 pb-24 lg:px-8 lg:pb-32">
+      <section className="relative overflow-hidden bg-white pt-32 dark:bg-[#0a110e] lg:pt-40">
+
+        {/* Decorative */}
+        <div className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-[#dfeee7] blur-3xl dark:bg-[#123326]" />
+
+        <div className="pointer-events-none absolute -left-40 bottom-0 h-[300px] w-[300px] rounded-full bg-[#edf5f1] blur-3xl dark:bg-[#10271e]" />
+
+        <div className="relative mx-auto max-w-[1320px] px-6 pb-24 lg:px-8 lg:pb-32">
+
+          {/* HERO CONTENT */}
+          <div className="grid items-center gap-12 lg:grid-cols-[1fr_450px] lg:gap-16">
+
+            {/* KIRI — TEXT */}
             <div className="max-w-[850px]">
+
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#2e8066] dark:text-[#75c6a4]">
                 Tentang Kampung
               </span>
@@ -104,6 +114,7 @@ export default function ProfilPage() {
               </p>
 
               <div className="mt-9 flex flex-wrap gap-3">
+
                 {profile?.kecamatan && (
                   <span className="rounded-full border border-[#dce8e2] bg-[#f7faf8] px-4 py-2 text-[11px] font-medium text-[#416157] dark:border-[#294238] dark:bg-[#13241d] dark:text-[#a8beb4]">
                     Kecamatan {profile.kecamatan}
@@ -115,10 +126,43 @@ export default function ProfilPage() {
                     Kabupaten {profile.kabupaten}
                   </span>
                 )}
+
               </div>
+
             </div>
+
+            {/* KANAN — LOGO */}
+            <div className="flex items-center justify-center lg:justify-end">
+
+              {/* CIRCLE */}
+              <div className="relative aspect-square w-[280px] sm:w-[360px] lg:w-[400px]">
+
+                {/* Outer Circle */}
+                <div className="absolute inset-0 rounded-full border border-[#d8e8e0] bg-[#f7faf8] dark:border-[#294238] dark:bg-[#10271e]" />
+
+                {/* Inner Circle */}
+                <div className="absolute inset-[14px] rounded-full border border-[#e4eee9] dark:border-[#213b30]" />
+
+                {/* Logo */}
+                <div className="absolute inset-0 flex items-center justify-center">
+
+                  <img
+                    src="/images/logo.png"
+                    alt="Logo Kampung Paluh"
+                    className="h-[190px] w-[190px] object-contain sm:h-[240px] sm:w-[240px] lg:h-[270px] lg:w-[270px]"
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
-        </section>
+
+        </div>
+
+      </section>
 
         {/* =========================================================
             STATISTIK
@@ -283,72 +327,113 @@ export default function ProfilPage() {
           </div>
         </section>
 
-        {/* =========================================================
-            LOKASI
-        ========================================================== */}
-        <section className="bg-[#f7f9f7] py-24 dark:bg-[#0d1713] lg:py-28">
-          <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
-            <div className="overflow-hidden rounded-[30px] border border-[#dfe8e3] bg-[#eaf1ed] dark:border-[#263b32] dark:bg-[#12221b]">
-              <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
-                {/* Text */}
-                <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-14">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2e8066] dark:text-[#75c6a4]">
-                    Lokasi
-                  </span>
+{/* =========================================================
+    LOKASI
+========================================================= */}
 
-                  <h2 className="mt-4 text-[34px] font-semibold tracking-[-0.04em] text-[#075b43] dark:text-[#9de0bf]">
-                    Kampung Paluh
-                  </h2>
+<section className="bg-[#f7f9f7] py-24 dark:bg-[#0d1713] lg:py-28">
+  <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
 
-                  <p className="mt-4 text-[14px] leading-[1.9] text-[#68716d] dark:text-[#9eaea6]">
-                    {lokasi || "Lokasi administratif belum tersedia."}
-                  </p>
+    <div className="overflow-hidden rounded-[30px] border border-[#dfe8e3] bg-[#eaf1ed] dark:border-[#263b32] dark:bg-[#12221b]">
 
-                  <p className="mt-3 text-[13px] leading-[1.8] text-[#7c8882] dark:text-[#879b92]">
-                    {alamat}
-                  </p>
+      <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
 
-                  {profile?.latitude && profile?.longitude && (
-                    <a
-                      href={`https://www.google.com/maps?q=${profile.longitude},${profile.latitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-[#003c2b] px-5 py-3 text-[12px] font-semibold text-white transition-colors hover:bg-[#075b43]"
-                    >
-                      Lihat di Google Maps
-                      <span>↗</span>
-                    </a>
-                  )}
+        {/* =====================================================
+            TEXT
+        ====================================================== */}
+
+        <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-14">
+
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2e8066] dark:text-[#75c6a4]">
+            Lokasi
+          </span>
+
+          <h2 className="mt-4 text-[34px] font-semibold tracking-[-0.04em] text-[#075b43] dark:text-[#9de0bf]">
+            Kampung Paluh
+          </h2>
+
+          <p className="mt-4 text-[14px] leading-[1.9] text-[#68716d] dark:text-[#9eaea6]">
+            {lokasi || "Lokasi administratif belum tersedia."}
+          </p>
+
+          <p className="mt-3 text-[13px] leading-[1.8] text-[#7c8882] dark:text-[#879b92]">
+            {alamat}
+          </p>
+
+          {/* BUTTON GOOGLE MAPS */}
+
+          {profile?.latitude && profile?.longitude && (
+            <a
+              href={`https://www.google.com/maps?q=${profile.latitude},${profile.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                mt-7
+                inline-flex
+                w-fit
+                items-center
+                gap-2
+                rounded-full
+                bg-[#003c2b]
+                px-5
+                py-3
+                text-[12px]
+                font-semibold
+                text-white
+                transition-colors
+                hover:bg-[#075b43]
+              "
+            >
+              Lihat di Google Maps
+              <span>↗</span>
+            </a>
+          )}
+
+        </div>
+
+        {/* =====================================================
+            MAP
+        ====================================================== */}
+
+        <div className="relative min-h-[360px] bg-[#dce8e2] dark:bg-[#1a3027]">
+
+          {profile?.latitude && profile?.longitude ? (
+
+            <LeafletMap
+              latitude={Number(profile.latitude)}
+              longitude={Number(profile.longitude)}
+              nama="Kampung Paluh"
+            />
+
+          ) : (
+
+            <div className="flex h-full min-h-[360px] items-center justify-center p-8 text-center">
+
+              <div>
+
+                <div className="text-[13px] font-semibold text-[#50645b] dark:text-[#a8bbb2]">
+                  Lokasi belum tersedia
                 </div>
 
-                {/* Map */}
-                <div className="relative min-h-[360px] bg-[#dce8e2] dark:bg-[#1a3027]">
-                  {profile?.latitude && profile?.longitude ? (
-                    <iframe
-                      title="Lokasi Kampung Paluh"
-                      src={`https://www.google.com/maps?q=${profile.longitude},${profile.latitude}&z=15&output=embed`}
-                      className="absolute inset-0 h-full w-full border-0"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-full min-h-[360px] items-center justify-center p-8 text-center">
-                      <div>
-                        <div className="text-[13px] font-semibold text-[#50645b] dark:text-[#a8bbb2]">
-                          Lokasi belum tersedia
-                        </div>
+                <p className="mt-2 text-[11px] text-[#82908a]">
+                  Koordinat Kampung Paluh dapat ditambahkan melalui
+                  halaman admin.
+                </p>
 
-                        <p className="mt-2 text-[11px] text-[#82908a]">
-                          Koordinat Kampung Paluh dapat ditambahkan melalui
-                          halaman admin.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
+
             </div>
-          </div>
-        </section>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
       </main>
 
       <Footer />
