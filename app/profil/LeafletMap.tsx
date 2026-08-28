@@ -2,16 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
-type LeafletMapProps = {
-  latitude: number;
-  longitude: number;
-  nama: string;
-};
+import "leaflet/dist/leaflet.css";
+
+interface LeafletMapProps {
+  nama?: string;
+}
 
 export default function LeafletMap({
-  latitude,
-  longitude,
-  nama,
+  nama = "Kampung Paluh",
 }: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -19,157 +17,231 @@ export default function LeafletMap({
   useEffect(() => {
     if (!mapRef.current) return;
 
+    // Jangan membuat map dua kali
+    if (mapInstanceRef.current) return;
+
     let cancelled = false;
 
     async function initMap() {
+      // =====================================================
+      // IMPORT LEAFLET
+      // =====================================================
+
       const L = await import("leaflet");
 
       if (cancelled || !mapRef.current) return;
 
+      // Pastikan tidak ada instance lama
       if (mapInstanceRef.current) return;
 
-      /* =====================================================
-         FIX ICON LEAFLET
-      ===================================================== */
+      // =====================================================
+      // KOORDINAT KAMPUNG PALUH
+      // =====================================================
 
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      const latitude = 0.797965;
+      const longitude = 102.075119;
 
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+      console.log("Koordinat Kampung Paluh:", {
+        latitude,
+        longitude,
       });
 
-      /* =====================================================
-         CREATE MAP
-      ===================================================== */
+      // =====================================================
+      // MAP
+      // =====================================================
 
       const map = L.map(mapRef.current, {
         center: [latitude, longitude],
-        zoom: 15,
+        zoom: 14,
         zoomControl: true,
       });
 
       mapInstanceRef.current = map;
 
-      /* =====================================================
-         SATELLITE
-      ===================================================== */
+      // =====================================================
+      // OPENSTREETMAP
+      // =====================================================
 
-      const satellite = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-          maxZoom: 19,
-
-          attribution:
-            "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
-        }
-      );
-
-      /* =====================================================
-         STREET MAP (default)
-         Dipakai sebagai layer utama karena citra satelit Esri
-         belum tersedia untuk sebagian area seperti Kampung
-         Paluh — jika langsung dijadikan default, peta tampil
-         kosong dengan watermark "Map data not yet available".
-         OpenStreetMap punya cakupan global yang lebih lengkap.
-      ===================================================== */
-
-      const street = L.tileLayer(
+      L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
           maxZoom: 19,
 
           attribution:
-            "© OpenStreetMap contributors",
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
         }
-      );
+      ).addTo(map);
 
-      street.addTo(map);
+      // =====================================================
+      // BATAS WILAYAH KAMPUNG PALUH
+      // =====================================================
 
-      /* =====================================================
-         MARKER
-      ===================================================== */
+      try {
+        const response = await fetch("/data/batasPaluh.geojson");
+
+        if (!response.ok) {
+          throw new Error(
+            `Gagal mengambil GeoJSON. Status: ${response.status}`
+          );
+        }
+
+        const geojson = await response.json();
+
+        if (cancelled || !mapInstanceRef.current) return;
+
+        // ===================================================
+        // GEOJSON LAYER
+        // ===================================================
+
+        const batasLayer = L.geoJSON(geojson, {
+          style: {
+            color: "#075b43",
+            weight: 3,
+            opacity: 1,
+
+            fillColor: "#3c9b78",
+            fillOpacity: 0.15,
+
+            lineJoin: "round",
+            lineCap: "round",
+          },
+
+          // =================================================
+          // INTERAKSI BATAS
+          // =================================================
+
+          onEachFeature: (_feature, layer) => {
+            layer.bindPopup(`
+              <div
+                style="
+                  min-width: 170px;
+                  text-align: center;
+                  font-family: Arial, sans-serif;
+                  padding: 5px;
+                "
+              >
+                <strong
+                  style="
+                    color: #075b43;
+                    font-size: 14px;
+                  "
+                >
+                  ${nama}
+                </strong>
+
+                <div
+                  style="
+                    margin-top: 5px;
+                    color: #68716d;
+                    font-size: 11px;
+                  "
+                >
+                  Batas Wilayah Kampung
+                </div>
+              </div>
+            `);
+
+            layer.on({
+              mouseover: (event: any) => {
+                event.target.setStyle({
+                  weight: 4,
+                  color: "#003c2b",
+                  fillColor: "#3c9b78",
+                  fillOpacity: 0.22,
+                });
+              },
+
+              mouseout: (event: any) => {
+                event.target.setStyle({
+                  weight: 3,
+                  color: "#075b43",
+                  fillColor: "#3c9b78",
+                  fillOpacity: 0.15,
+                });
+              },
+            });
+          },
+        }).addTo(map);
+
+        // ===================================================
+        // AUTO FIT KE BATAS WILAYAH
+        // ===================================================
+
+        const bounds = batasLayer.getBounds();
+
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, {
+            padding: [30, 30],
+          });
+        }
+
+        console.log("Batas wilayah Kampung Paluh berhasil dimuat.");
+      } catch (error) {
+        console.error(
+          "Gagal memuat batas wilayah Kampung Paluh:",
+          error
+        );
+      }
+
+      // =====================================================
+      // MARKER KAMPUNG PALUH
+      // =====================================================
 
       const marker = L.marker([
         latitude,
         longitude,
       ]).addTo(map);
 
-      marker.bindPopup(`
-        <div style="
-          min-width:180px;
-          font-family:Arial,sans-serif;
-        ">
+      marker
+        .bindPopup(
+          `
+            <div
+              style="
+                min-width: 150px;
+                text-align: center;
+                font-family: Arial, sans-serif;
+                padding: 4px;
+              "
+            >
+              <strong
+                style="
+                  color: #075b43;
+                  font-size: 14px;
+                "
+              >
+                ${nama}
+              </strong>
 
-          <div style="
-            font-size:13px;
-            font-weight:700;
-            color:#075b43;
-            margin-bottom:4px;
-          ">
-            ${nama}
-          </div>
-
-          <div style="
-            font-size:11px;
-            color:#68716d;
-          ">
-            Lokasi Kampung Paluh
-          </div>
-
-        </div>
-      `);
-
-      marker.openPopup();
-
-      /* =====================================================
-         LAYER CONTROL
-      ===================================================== */
-
-      L.control
-        .layers(
-          {
-            Peta: street,
-            Satellite: satellite,
-          },
-          undefined,
-          {
-            position: "topright",
-          }
+              <div
+                style="
+                  margin-top: 5px;
+                  color: #68716d;
+                  font-size: 11px;
+                "
+              >
+                Lokasi Kampung
+              </div>
+            </div>
+          `
         )
-        .addTo(map);
+        .openPopup();
 
-      /* =====================================================
-         SCALE
-      ===================================================== */
-
-      L.control
-        .scale({
-          imperial: false,
-        })
-        .addTo(map);
-
-      /* =====================================================
-         INVALIDATE SIZE
-         Penting karena map berada di dalam grid
-      ===================================================== */
+      // =====================================================
+      // RESIZE
+      // =====================================================
 
       setTimeout(() => {
-        map.invalidateSize();
-      }, 200);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 300);
     }
 
     initMap();
 
-    /* =======================================================
-       CLEANUP
-    ======================================================= */
+    // =====================================================
+    // CLEANUP
+    // =====================================================
 
     return () => {
       cancelled = true;
@@ -179,16 +251,19 @@ export default function LeafletMap({
         mapInstanceRef.current = null;
       }
     };
-  }, [latitude, longitude, nama]);
+  }, [nama]);
+
+  // =========================================================
+  // RENDER
+  // =========================================================
 
   return (
     <div
       ref={mapRef}
-      className="
-        h-[360px]
-        w-full
-        lg:h-[500px]
-      "
+      className="h-full min-h-[360px] w-full"
+      style={{
+        minHeight: "360px",
+      }}
     />
   );
 }

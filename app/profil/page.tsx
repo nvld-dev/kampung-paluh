@@ -364,7 +364,7 @@ export default function ProfilPage() {
 
           {profile?.latitude && profile?.longitude && (
             <a
-              href={`https://www.google.com/maps?q=${profile.latitude},${profile.longitude}`}
+              href="https://www.google.com/maps?q=0.775123,101.657321"
               target="_blank"
               rel="noopener noreferrer"
               className="
@@ -395,37 +395,9 @@ export default function ProfilPage() {
             MAP
         ====================================================== */}
 
+        {/* MAP */}
         <div className="relative min-h-[360px] bg-[#dce8e2] dark:bg-[#1a3027]">
-
-          {profile?.latitude && profile?.longitude ? (
-
-            <LeafletMap
-              latitude={Number(profile.latitude)}
-              longitude={Number(profile.longitude)}
-              nama="Kampung Paluh"
-            />
-
-          ) : (
-
-            <div className="flex h-full min-h-[360px] items-center justify-center p-8 text-center">
-
-              <div>
-
-                <div className="text-[13px] font-semibold text-[#50645b] dark:text-[#a8bbb2]">
-                  Lokasi belum tersedia
-                </div>
-
-                <p className="mt-2 text-[11px] text-[#82908a]">
-                  Koordinat Kampung Paluh dapat ditambahkan melalui
-                  halaman admin.
-                </p>
-
-              </div>
-
-            </div>
-
-          )}
-
+          <LeafletMap nama="Kampung Paluh" />
         </div>
 
       </div>

@@ -23,27 +23,6 @@ export default function Hero() {
         <div className="max-w-[720px]">
           {/* EYEBROW */}
           <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[#075b43]/10 bg-white/75 px-4 py-2.5 shadow-sm backdrop-blur-md transition-colors duration-500 dark:border-[#75c6a4]/15 dark:bg-[#10221b]/75">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e5f0ea] text-[#075b43] transition-colors duration-500 dark:bg-[#193a2e] dark:text-[#9de0bf]">
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 3C7.5 5.2 5 8.4 5 12.2C5 17 8.1 20 12 21C15.9 20 19 17 19 12.2C19 8.4 16.5 5.2 12 3Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M8 14C10.2 13.5 12.2 12.4 13.8 10.7C15 9.4 15.8 8 16.2 6.6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
 
             <span className="text-[10px] font-semibold tracking-[0.18em] text-[#31594b] transition-colors duration-500 dark:text-[#9acdb5]">
               PORTAL PROMOSI KAMPUNG
