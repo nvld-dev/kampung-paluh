@@ -256,7 +256,7 @@ export default function ProfilPage() {
 
               {/* Content */}
               <div className="space-y-7">
-                <p className="text-[16px] font-medium leading-[1.9] text-[#40534b] dark:text-[#b6c8c0]">
+                <p className="whitespace-pre-wrap text-[16px] font-medium leading-[1.9] text-[#40534b] dark:text-[#b6c8c0]">
                   {sejarahLengkap}
                 </p>
 
@@ -327,85 +327,85 @@ export default function ProfilPage() {
           </div>
         </section>
 
-{/* =========================================================
-    LOKASI
-========================================================= */}
+        {/* =========================================================
+            LOKASI
+        ========================================================= */}
 
-<section className="bg-[#f7f9f7] py-24 dark:bg-[#0d1713] lg:py-28">
-  <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
+        <section className="bg-[#f7f9f7] py-24 dark:bg-[#0d1713] lg:py-28">
+          <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
 
-    <div className="overflow-hidden rounded-[30px] border border-[#dfe8e3] bg-[#eaf1ed] dark:border-[#263b32] dark:bg-[#12221b]">
+            <div className="overflow-hidden rounded-[30px] border border-[#dfe8e3] bg-[#eaf1ed] dark:border-[#263b32] dark:bg-[#12221b]">
 
-      <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
 
-        {/* =====================================================
-            TEXT
-        ====================================================== */}
+                {/* =====================================================
+                    TEXT
+                ====================================================== */}
 
-        <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-14">
+                <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-14">
 
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2e8066] dark:text-[#75c6a4]">
-            Lokasi
-          </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2e8066] dark:text-[#75c6a4]">
+                    Lokasi
+                  </span>
 
-          <h2 className="mt-4 text-[34px] font-semibold tracking-[-0.04em] text-[#075b43] dark:text-[#9de0bf]">
-            Kampung Paluh
-          </h2>
+                  <h2 className="mt-4 text-[34px] font-semibold tracking-[-0.04em] text-[#075b43] dark:text-[#9de0bf]">
+                    Kampung Paluh
+                  </h2>
 
-          <p className="mt-4 text-[14px] leading-[1.9] text-[#68716d] dark:text-[#9eaea6]">
-            {lokasi || "Lokasi administratif belum tersedia."}
-          </p>
+                  <p className="mt-4 text-[14px] leading-[1.9] text-[#68716d] dark:text-[#9eaea6]">
+                    {lokasi || "Lokasi administratif belum tersedia."}
+                  </p>
 
-          <p className="mt-3 text-[13px] leading-[1.8] text-[#7c8882] dark:text-[#879b92]">
-            {alamat}
-          </p>
+                  <p className="mt-3 text-[13px] leading-[1.8] text-[#7c8882] dark:text-[#879b92]">
+                    {alamat}
+                  </p>
 
-          {/* BUTTON GOOGLE MAPS */}
+                  {/* BUTTON GOOGLE MAPS */}
 
-          {profile?.latitude && profile?.longitude && (
-            <a
-              href="https://www.google.com/maps?q=0.775123,101.657321"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="
-                mt-7
-                inline-flex
-                w-fit
-                items-center
-                gap-2
-                rounded-full
-                bg-[#003c2b]
-                px-5
-                py-3
-                text-[12px]
-                font-semibold
-                text-white
-                transition-colors
-                hover:bg-[#075b43]
-              "
-            >
-              Lihat di Google Maps
-              <span>↗</span>
-            </a>
-          )}
+                  {profile?.latitude && profile?.longitude && (
+                    <a
+                      href="https://www.google.com/maps?q=0.775123,101.657321"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="
+                        mt-7
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-2
+                        rounded-full
+                        bg-[#003c2b]
+                        px-5
+                        py-3
+                        text-[12px]
+                        font-semibold
+                        text-white
+                        transition-colors
+                        hover:bg-[#075b43]
+                      "
+                    >
+                      Lihat di Google Maps
+                      <span>↗</span>
+                    </a>
+                  )}
 
-        </div>
+                </div>
 
-        {/* =====================================================
-            MAP
-        ====================================================== */}
+                {/* =====================================================
+                    MAP
+                ====================================================== */}
 
-        {/* MAP */}
-        <div className="relative min-h-[360px] bg-[#dce8e2] dark:bg-[#1a3027]">
-          <LeafletMap nama="Kampung Paluh" />
-        </div>
+                {/* MAP */}
+                <div className="relative min-h-[360px] bg-[#dce8e2] dark:bg-[#1a3027]">
+                  <LeafletMap nama="Kampung Paluh" />
+                </div>
 
-      </div>
+              </div>
 
-    </div>
+            </div>
 
-  </div>
-</section>
+          </div>
+        </section>
       </main>
 
       <Footer />
