@@ -54,17 +54,14 @@ export async function createFacility(
     FACILITIES_COLLECTION
   );
 
-  const document = await addDoc(
-    facilitiesRef,
-    {
-      nama: data.nama,
-      deskripsi: data.deskripsi,
-      status: data.status,
-
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    }
-  );
+const document = await addDoc(facilitiesRef, {
+  nama: data.nama,
+  jumlah: data.jumlah,
+  deskripsi: data.deskripsi,
+  status: data.status,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
 
   return document.id;
 }
@@ -79,13 +76,13 @@ export async function updateFacility(
     id
   );
 
-  await updateDoc(facilityRef, {
-    nama: data.nama,
-    deskripsi: data.deskripsi,
-    status: data.status,
-
-    updatedAt: serverTimestamp(),
-  });
+await updateDoc(facilityRef, {
+  nama: data.nama,
+  jumlah: data.jumlah,
+  deskripsi: data.deskripsi,
+  status: data.status,
+  updatedAt: serverTimestamp(),
+});
 }
 
 export async function deleteFacility(
