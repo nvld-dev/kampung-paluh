@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -29,7 +29,11 @@ type SearchResult = {
   meta?: string;
 };
 
-export default function CariPage() {
+/* =========================================================
+   SEARCH CONTENT
+========================================================= */
+
+function CariContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
 
@@ -40,6 +44,10 @@ export default function CariPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
 
   useEffect(() => {
     async function loadData() {
@@ -60,23 +68,33 @@ export default function CariPage() {
         ]);
 
         setUmkm(
-          umkmData.filter((item) => item.status === "aktif")
+          umkmData.filter(
+            (item) => item.status === "aktif"
+          )
         );
 
         setProducts(
-          productData.filter((item) => item.status === "aktif")
+          productData.filter(
+            (item) => item.status === "aktif"
+          )
         );
 
         setEvents(
-          eventData.filter((item) => item.status === "aktif")
+          eventData.filter(
+            (item) => item.status === "aktif"
+          )
         );
 
         setNews(
-          newsData.filter((item) => item.status === "aktif")
+          newsData.filter(
+            (item) => item.status === "aktif"
+          )
         );
       } catch (err) {
         console.error("Gagal melakukan pencarian:", err);
-        setError("Pencarian gagal dimuat. Silakan coba lagi.");
+        setError(
+          "Pencarian gagal dimuat. Silakan coba lagi."
+        );
       } finally {
         setLoading(false);
       }
@@ -85,6 +103,10 @@ export default function CariPage() {
     loadData();
   }, []);
 
+  /* =========================================================
+     SEARCH RESULTS
+  ========================================================= */
+
   const results = useMemo<SearchResult[]>(() => {
     if (!query) return [];
 
@@ -92,7 +114,10 @@ export default function CariPage() {
 
     const result: SearchResult[] = [];
 
-    // UMKM
+    /* =======================================================
+       UMKM
+    ======================================================= */
+
     umkm.forEach((item) => {
       const searchable = [
         item.nama,
@@ -111,14 +136,20 @@ export default function CariPage() {
         type: "UMKM",
         title: item.nama,
         description:
-          item.deskripsi || "Informasi UMKM Kampung Paluh.",
+          item.deskripsi ||
+          "Informasi UMKM Kampung Paluh.",
         image: item.foto,
-        href: item.slug ? `/umkm/${item.slug}` : "/umkm",
+        href: item.slug
+          ? `/umkm/${item.slug}`
+          : "/umkm",
         meta: item.kategori,
       });
     });
 
-    // PRODUK
+    /* =======================================================
+       PRODUK
+    ======================================================= */
+
     products.forEach((item) => {
       const searchable = [
         item.nama,
@@ -137,14 +168,18 @@ export default function CariPage() {
         type: "Produk",
         title: item.nama,
         description:
-          item.deskripsi || "Produk lokal Kampung Paluh.",
+          item.deskripsi ||
+          "Produk lokal Kampung Paluh.",
         image: item.foto,
         href: "/umkm",
         meta: item.kategori,
       });
     });
 
-    // KEGIATAN
+    /* =======================================================
+       KEGIATAN
+    ======================================================= */
+
     events.forEach((item) => {
       const searchable = [
         item.judul,
@@ -162,14 +197,18 @@ export default function CariPage() {
         type: "Kegiatan",
         title: item.judul,
         description:
-          item.deskripsi || "Informasi kegiatan Kampung Paluh.",
+          item.deskripsi ||
+          "Informasi kegiatan Kampung Paluh.",
         image: item.foto?.[0] ?? "",
         href: `/kegiatan/${item.slug}`,
         meta: item.tanggal,
       });
     });
 
-    // BERITA
+    /* =======================================================
+       BERITA
+    ======================================================= */
+
     news.forEach((item) => {
       const searchable = [
         item.judul,
@@ -188,7 +227,8 @@ export default function CariPage() {
         type: "Berita",
         title: item.judul,
         description:
-          item.ringkasan || "Informasi Kampung Paluh.",
+          item.ringkasan ||
+          "Informasi Kampung Paluh.",
         image: item.foto,
         href: `/berita/${item.slug}`,
         meta: item.kategori,
@@ -198,6 +238,10 @@ export default function CariPage() {
     return result;
   }, [query, umkm, products, events, news]);
 
+  /* =========================================================
+     PAGE
+  ========================================================= */
+
   return (
     <div className="min-h-screen bg-white text-[#17201d] dark:bg-[#0d1713] dark:text-[#edf5f0]">
       <Navbar />
@@ -205,7 +249,10 @@ export default function CariPage() {
       <main className="pb-24 pt-32 lg:pt-40">
         <div className="mx-auto max-w-[1320px] px-6 lg:px-8">
 
-          {/* HEADER */}
+          {/* =================================================
+              HEADER
+          ================================================= */}
+
           <div className="max-w-[760px]">
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2e8066] dark:text-[#75c6a4]">
               Pencarian
@@ -229,13 +276,17 @@ export default function CariPage() {
             )}
           </div>
 
-          {/* SEARCH BOX */}
+          {/* =================================================
+              SEARCH BOX
+          ================================================= */}
+
           <form
             action="/cari"
             method="GET"
             className="mt-8 flex max-w-[680px] items-center gap-2 rounded-2xl border border-[#dfe7e2] bg-[#f7f9f7] p-2 dark:border-white/[0.08] dark:bg-[#12221b]"
           >
             <div className="flex h-11 flex-1 items-center gap-3 px-3">
+
               <svg
                 width="18"
                 height="18"
@@ -275,14 +326,20 @@ export default function CariPage() {
             </button>
           </form>
 
-          {/* ERROR */}
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
           {error && (
             <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-[12px] text-red-700">
               {error}
             </div>
           )}
 
-          {/* LOADING */}
+          {/* =================================================
+              LOADING
+          ================================================= */}
+
           {loading && query && (
             <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((item) => (
@@ -294,31 +351,41 @@ export default function CariPage() {
             </div>
           )}
 
-          {/* RESULTS */}
-          {!loading && !error && query && results.length > 0 && (
-            <>
-              <div className="mt-12 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#89938f]">
-                {results.length} hasil ditemukan
-              </div>
+          {/* =================================================
+              RESULTS
+          ================================================= */}
 
-              <div className="mt-5 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {results.map((item) => (
-                  <SearchCard
-                    key={item.id}
-                    item={item}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+          {!loading &&
+            !error &&
+            query &&
+            results.length > 0 && (
+              <>
+                <div className="mt-12 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#89938f]">
+                  {results.length} hasil ditemukan
+                </div>
 
-          {/* EMPTY */}
+                <div className="mt-5 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {results.map((item) => (
+                    <SearchCard
+                      key={item.id}
+                      item={item}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+          {/* =================================================
+              EMPTY
+          ================================================= */}
+
           {!loading &&
             !error &&
             query &&
             results.length === 0 && (
               <div className="mt-12 flex min-h-[280px] items-center justify-center rounded-[24px] bg-[#f7f9f7] dark:bg-[#12221b]">
                 <div className="text-center">
+
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e9f1ed] text-[#075b43] dark:bg-[#193a2e] dark:text-[#75c6a4]">
                     <svg
                       width="25"
@@ -348,26 +415,33 @@ export default function CariPage() {
                   </h2>
 
                   <p className="mt-2 text-[12px] text-[#7b8580] dark:text-[#91a29a]">
-                    Tidak ditemukan informasi yang sesuai dengan
-                    pencarian "{query}".
+                    Tidak ditemukan informasi yang
+                    sesuai dengan pencarian "{query}".
                   </p>
                 </div>
               </div>
             )}
 
-          {/* INITIAL */}
+          {/* =================================================
+              INITIAL STATE
+          ================================================= */}
+
           {!loading && !query && (
             <div className="mt-12 rounded-[24px] bg-[#f7f9f7] p-10 dark:bg-[#12221b]">
+
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#2e8066] dark:text-[#75c6a4]">
                 Jelajahi Kampung Paluh
               </div>
 
               <p className="mt-3 max-w-[550px] text-[13px] leading-[1.8] text-[#68716d] dark:text-[#9eaea6]">
-                Gunakan pencarian untuk menemukan UMKM, produk lokal,
-                kegiatan, dan berita Kampung Paluh.
+                Gunakan pencarian untuk menemukan UMKM,
+                produk lokal, kegiatan, dan berita Kampung
+                Paluh.
               </p>
+
             </div>
           )}
+
         </div>
       </main>
 
@@ -375,6 +449,22 @@ export default function CariPage() {
     </div>
   );
 }
+
+
+/* =========================================================
+   PAGE WRAPPER
+   Suspense diperlukan karena CariContent menggunakan
+   useSearchParams()
+========================================================= */
+
+export default function CariPage() {
+  return (
+    <Suspense fallback={null}>
+      <CariContent />
+    </Suspense>
+  );
+}
+
 
 /* =========================================================
    SEARCH CARD
@@ -391,6 +481,7 @@ function SearchCard({
       className="group overflow-hidden rounded-[22px] border border-black/[0.05] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.06)] dark:border-white/[0.07] dark:bg-[#12221b]"
     >
       <div className="relative h-[190px] overflow-hidden bg-[#e9f1ed] dark:bg-[#193027]">
+
         {item.image ? (
           <img
             src={item.image}
@@ -431,9 +522,11 @@ function SearchCard({
             {item.type}
           </span>
         </div>
+
       </div>
 
       <div className="p-5">
+
         {item.meta && (
           <div className="text-[10px] font-medium text-[#89938f] dark:text-[#71817a]">
             {item.meta}
@@ -451,6 +544,7 @@ function SearchCard({
         <div className="mt-5 text-[11px] font-semibold text-[#075b43] dark:text-[#75c6a4]">
           Lihat Selengkapnya →
         </div>
+
       </div>
     </Link>
   );
