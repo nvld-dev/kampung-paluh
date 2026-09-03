@@ -13,13 +13,17 @@ export default function AdminLayout({
 }: AdminLayoutProps) {
   return (
     <AdminGuard>
-      <div className="flex min-h-screen bg-[#f5f8f6]">
+      <div className="flex h-screen overflow-hidden bg-[#f5f8f6]">
+        {/* SIDEBAR */}
         <AdminSidebar />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* AREA UTAMA */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* HEADER */}
           <AdminHeader />
 
-          <main className="min-w-0 flex-1 overflow-y-auto">
+          {/* CONTENT — HANYA BAGIAN INI YANG SCROLL */}
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
             {children}
           </main>
         </div>

@@ -58,24 +58,31 @@ export default function BeritaPage() {
 
       <main>
         {/* HERO */}
-        <section className="relative overflow-hidden bg-[#003c2b] pt-32 pb-20 dark:bg-[#0a1711]">
+        <section className="relative overflow-hidden bg-white pt-32 pb-20 dark:bg-[#0a110e]">
           {/* Decorative */}
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#2e8066]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-[#75c6a4]/10 blur-3xl" />
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#75c6a4]/10 blur-3xl"
+            aria-hidden="true"
+          />
+
+          <div
+            className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-[#2e8066]/[0.06] blur-3xl"
+            aria-hidden="true"
+          />
 
           <div className="relative mx-auto max-w-[1320px] px-6 lg:px-8">
-            <div className="max-w-[700px]">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9de0bf]">
+            <div className="max-w-[760px]">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#2e8066] dark:text-[#75c6a4]">
                 Informasi Kampung
               </span>
 
-              <h1 className="mt-4 text-[40px] font-semibold leading-[1.08] tracking-[-0.05em] text-white sm:text-[52px] lg:text-[58px]">
+              <h1 className="mt-4 text-[40px] font-semibold leading-[1.08] tracking-[-0.05em] text-[#17201d] dark:text-[#edf5f0] sm:text-[52px] lg:text-[58px]">
                 Berita & Cerita
                 <br />
                 Kampung Paluh
               </h1>
 
-              <p className="mt-6 max-w-[590px] text-[14px] leading-[1.85] text-[#c9ddd4]">
+              <p className="mt-6 max-w-[590px] text-[14px] leading-[1.85] text-[#68736e] dark:text-[#9eaea6]">
                 Temukan informasi, cerita, kegiatan, dan berbagai kabar
                 terbaru dari Kampung Paluh.
               </p>

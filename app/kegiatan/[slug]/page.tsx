@@ -276,116 +276,130 @@ export default function DetailKegiatanPage() {
             </div>
           </div>
 
-          {/* GALLERY */}
-          {photos.length > 0 ? (
-            <section className="mt-10">
-              <div className="grid gap-4 lg:grid-cols-[1.5fr_0.5fr]">
-                {/* MAIN PHOTO */}
-                <div className="relative min-h-[360px] overflow-hidden rounded-[28px] bg-[#edf2ef] sm:min-h-[460px] lg:min-h-[520px]">
-                  <img
-                    src={activePhoto}
-                    alt={event.judul}
-                    className="h-full w-full object-cover"
-                  />
+{/* GALLERY */}
+{photos.length > 0 ? (
+  <section className="mt-10">
+    {/* MAIN PHOTO */}
+    <div className="relative aspect-[16/7] overflow-hidden rounded-[24px] bg-[#edf2ef] dark:bg-[#12221b]">
+      <img
+        src={activePhoto}
+        alt={event.judul}
+        className="h-full w-full object-cover"
+      />
 
-                  {/* Counter */}
-                  {photos.length > 1 && (
-                    <div className="absolute bottom-5 left-5 rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                      {selectedPhoto + 1} / {photos.length}
-                    </div>
-                  )}
-                </div>
+      {/* Counter */}
+      {photos.length > 1 && (
+        <div className="absolute bottom-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[10px] font-medium text-white backdrop-blur-sm">
+          {selectedPhoto + 1} / {photos.length}
+        </div>
+      )}
+    </div>
 
-                {/* THUMBNAILS */}
-                {photos.length > 1 && (
-                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-                    {photos.slice(0, 4).map((photo, index) => (
-                      <button
-                        key={`${photo}-${index}`}
-                        type="button"
-                        onClick={() => setSelectedPhoto(index)}
-                        className={`group relative min-h-[130px] overflow-hidden rounded-[20px] bg-[#edf2ef] outline-none ring-offset-2 transition-all lg:min-h-0 ${
-                          selectedPhoto === index
-                            ? "ring-2 ring-[#075b43] dark:ring-[#75c6a4]"
-                            : "hover:ring-2 hover:ring-[#075b43]/30"
-                        }`}
-                      >
-                        <img
-                          src={photo}
-                          alt={`${event.judul} - Foto ${index + 1}`}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+    {/* THUMBNAILS */}
+    {photos.length > 1 && (
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {photos.slice(0, 4).map((photo, index) => (
+          <button
+            key={`${photo}-${index}`}
+            type="button"
+            onClick={() => setSelectedPhoto(index)}
+            className={`group relative aspect-[4/2.5] overflow-hidden rounded-[16px] bg-[#edf2ef] outline-none ring-offset-2 transition-all dark:bg-[#12221b] ${
+              selectedPhoto === index
+                ? "ring-2 ring-[#075b43] dark:ring-[#75c6a4]"
+                : "hover:ring-2 hover:ring-[#075b43]/30"
+            }`}
+          >
+            <img
+              src={photo}
+              alt={`${event.judul} - Foto ${index + 1}`}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
 
-                        {selectedPhoto === index && (
-                          <div className="absolute inset-0 bg-[#075b43]/10" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {/* Active overlay */}
+            {selectedPhoto === index && (
+              <div className="absolute inset-0 bg-[#075b43]/10" />
+            )}
+          </button>
+        ))}
+      </div>
+    )}
 
-              {/* EXTRA PHOTOS */}
-              {photos.length > 4 && (
-                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {photos.slice(4).map((photo, index) => {
-                    const actualIndex = index + 4;
+    {/* EXTRA PHOTOS */}
+    {photos.length > 4 && (
+      <div className="mt-4">
+        <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#89938f] dark:text-[#71817a]">
+          Galeri Kegiatan
+        </div>
 
-                    return (
-                      <button
-                        key={`${photo}-${actualIndex}`}
-                        type="button"
-                        onClick={() => setSelectedPhoto(actualIndex)}
-                        className="group relative aspect-[4/3] overflow-hidden rounded-[20px] bg-[#edf2ef]"
-                      >
-                        <img
-                          src={photo}
-                          alt={`${event.judul} - Foto ${actualIndex + 1}`}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          ) : (
-            <div className="mt-10 flex min-h-[300px] items-center justify-center rounded-[28px] bg-[#f5f8f6] dark:bg-[#12221b]">
-              <div className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e9f1ed] text-[#075b43] dark:bg-[#193a2e] dark:text-[#75c6a4]">
-                  <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
-                    <rect
-                      x="4"
-                      y="4"
-                      width="16"
-                      height="16"
-                      rx="2"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                    />
-                    <circle
-                      cx="9"
-                      cy="9"
-                      r="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M5 17L10 12L13 15L15 13L19 17"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {photos.slice(4).map((photo, index) => {
+            const actualIndex = index + 4;
 
-                <p className="mt-4 text-[12px] text-[#89938f] dark:text-[#91a29a]">
-                  Belum ada foto kegiatan.
-                </p>
-              </div>
-            </div>
-          )}
+            return (
+              <button
+                key={`${photo}-${actualIndex}`}
+                type="button"
+                onClick={() => setSelectedPhoto(actualIndex)}
+                className="group relative aspect-[4/3] overflow-hidden rounded-[18px] bg-[#edf2ef] outline-none dark:bg-[#12221b]"
+              >
+                <img
+                  src={photo}
+                  alt={`${event.judul} - Foto ${actualIndex + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+
+                <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </section>
+) : (
+  <div className="mt-10 flex min-h-[300px] items-center justify-center rounded-[28px] bg-[#f5f8f6] dark:bg-[#12221b]">
+    <div className="text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e9f1ed] text-[#075b43] dark:bg-[#193a2e] dark:text-[#75c6a4]">
+        <svg
+          width="25"
+          height="25"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <rect
+            x="4"
+            y="4"
+            width="16"
+            height="16"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          />
+
+          <circle
+            cx="9"
+            cy="9"
+            r="1.5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+
+          <path
+            d="M5 17L10 12L13 15L15 13L19 17"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      <p className="mt-4 text-[12px] text-[#89938f] dark:text-[#91a29a]">
+        Belum ada foto kegiatan.
+      </p>
+    </div>
+  </div>
+)}
 
           {/* CONTENT */}
           <div className="mt-14 grid gap-12 lg:grid-cols-[1fr_300px]">

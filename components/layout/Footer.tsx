@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="relative overflow-hidden bg-[#003c2b] text-white">
@@ -12,38 +14,27 @@ export default function Footer() {
         aria-hidden="true"
       />
 
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#075b43]/20 blur-3xl"
+        aria-hidden="true"
+      />
+
       {/* Main Footer */}
-      <div className="relative mx-auto max-w-[1320px] px-6 pb-12 pt-16 lg:px-8 lg:pt-20">
-        <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+      <div className="relative mx-auto max-w-[1320px] px-6 pb-10 pt-16 lg:px-8 lg:pt-20">
+        <div className="grid gap-12 lg:grid-cols-[1.7fr_1fr_1fr_1.15fr] lg:gap-16">
           {/* Brand */}
-          <div className="max-w-[360px]">
-            <a
+          <div className="max-w-[390px]">
+            <Link
               href="/"
               className="group inline-flex items-center gap-3"
             >
               {/* Logo */}
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-[#9de0bf] ring-1 ring-white/10 transition-all duration-300 group-hover:bg-white/15 group-hover:ring-white/20">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12 3C7.5 5.2 5 8.4 5 12.2C5 17 8.1 20 12 21C15.9 20 19 17 19 12.2C19 8.4 16.5 5.2 12 3Z"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  />
-
-                  <path
-                    d="M8 14C10.2 13.5 12.2 12.4 13.8 10.7C15 9.4 15.8 8 16.2 6.6"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                </svg>
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-[1.03]">
+                <img
+                  src="/images/logo.png"
+                  alt="Logo Kampung Paluh"
+                  className="h-full w-full object-contain p-1.5"
+                />
               </div>
 
               <div>
@@ -51,188 +42,193 @@ export default function Footer() {
                   Kampung Paluh
                 </div>
 
-                <div className="mt-1 text-[9px] font-medium uppercase tracking-[0.18em] text-white/45">
+                <div className="mt-1 text-[9px] font-medium uppercase tracking-[0.2em] text-[#9de0bf]/65">
                   Portal Promosi Kampung
                 </div>
               </div>
-            </a>
+            </Link>
 
-            <p className="mt-6 max-w-[320px] text-[13px] leading-[1.8] text-white/55">
-              Media digital untuk memperkenalkan profil, potensi, produk
-              lokal, kegiatan, dan cerita masyarakat Kampung Paluh.
+            <p className="mt-6 max-w-[350px] text-[13px] leading-[1.9] text-white/55">
+              Portal digital Kampung Paluh yang menghadirkan informasi
+              mengenai profil kampung, potensi UMKM, produk lokal,
+              kegiatan, serta cerita masyarakat.
             </p>
 
-            {/* Social / Contact placeholder */}
-            <div className="mt-7 flex items-center gap-2">
-              <a
-                href="#"
-                aria-label="Instagram Kampung Paluh"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.07] text-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/15 hover:text-white"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <rect
-                    x="3"
-                    y="3"
-                    width="18"
-                    height="18"
-                    rx="5"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  />
-
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                  />
-
-                  <circle
-                    cx="17.5"
-                    cy="6.5"
-                    r="1"
-                    fill="currentColor"
-                  />
-                </svg>
-              </a>
-
-              <a
-                href="#"
-                aria-label="Kontak Kampung Paluh"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.07] text-white/60 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/15 hover:text-white"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M4 5.5C4 4.67 4.67 4 5.5 4H8L10 9L7.8 10.4C8.75 12.5 10.5 14.25 12.6 15.2L14 13L19 15V18.5C19 19.33 18.33 20 17.5 20C10.04 20 4 13.96 4 6.5V5.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </a>
+            {/* Small accent */}
+            <div className="mt-7 flex items-center gap-3">
+              <span className="h-px w-10 bg-[#75c6a4]/60" />
+              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/35">
+                Kenali • Jelajahi • Dukung
+              </span>
             </div>
           </div>
 
           {/* Navigasi */}
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9de0bf]">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9de0bf]">
               Navigasi
             </h3>
 
             <nav className="mt-5 flex flex-col gap-3.5">
-              <a
-                href="/"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Beranda
-              </a>
+              <FooterLink href="/" label="Beranda" />
 
-              <a
+              <FooterLink
                 href="/profil"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Profil Kampung
-              </a>
+                label="Profil Kampung"
+              />
 
-              <a
-                href="/kegiatan"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Kegiatan
-              </a>
-
-              <a
+              <FooterLink
                 href="/umkm"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Produk Lokal
-              </a>
+                label="UMKM & Produk Lokal"
+              />
 
-              <a
+              <FooterLink
+                href="/kegiatan"
+                label="Kegiatan"
+              />
+
+              <FooterLink
                 href="/berita"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Berita
-              </a>
+                label="Berita & Cerita"
+              />
             </nav>
           </div>
 
           {/* Jelajahi */}
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9de0bf]">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9de0bf]">
               Jelajahi
             </h3>
 
             <nav className="mt-5 flex flex-col gap-3.5">
-              <a
-                href="/umkm"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                UMKM
-              </a>
+              <FooterLink
+                href="/profil#sejarah"
+                label="Sejarah Kampung"
+              />
 
-              <a
-                href="/umkm"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Produk Lokal
-              </a>
+              <FooterLink
+                href="/profil#potensi"
+                label="Potensi Kampung"
+              />
 
-              <a
+              <FooterLink
+                href="/umkm"
+                label="Pelaku UMKM"
+              />
+
+              <FooterLink
+                href="/umkm"
+                label="Produk Lokal"
+              />
+
+              <FooterLink
                 href="/kegiatan"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Event & Kegiatan
-              </a>
-
-              <a
-                href="/berita"
-                className="w-fit text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
-              >
-                Cerita & Berita
-              </a>
+                label="Agenda Kegiatan"
+              />
             </nav>
           </div>
 
           {/* Informasi */}
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9de0bf]">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9de0bf]">
               Informasi
             </h3>
 
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 space-y-5">
+              {/* Location */}
               <div>
-                <div className="text-[11px] font-medium text-white/35">
+                <div className="flex items-center gap-2 text-[11px] font-medium text-white/35">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 21C16.5 16.8 19 13.6 19 9.8C19 5.9 15.9 3 12 3C8.1 3 5 5.9 5 9.8C5 13.6 7.5 16.8 12 21Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+
+                    <circle
+                      cx="12"
+                      cy="9.5"
+                      r="2.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+
                   Lokasi
                 </div>
 
-                <p className="mt-1 text-[13px] leading-relaxed text-white/55">
+                <p className="mt-2 text-[13px] leading-[1.8] text-white/55">
                   Kampung Paluh
                   <br />
-                  Tepian Sungai Siak
+                  Kecamatan Mempura
+                  <br />
+                  Kabupaten Siak, Riau
                 </p>
               </div>
 
+              {/* Website */}
               <div>
-                <div className="text-[11px] font-medium text-white/35">
+                <div className="flex items-center gap-2 text-[11px] font-medium text-white/35">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+
+                    <path
+                      d="M3 12H21M12 3C14.2 5.4 15.3 8.4 15.3 12C15.3 15.6 14.2 18.6 12 21C9.8 18.6 8.7 15.6 8.7 12C8.7 8.4 9.8 5.4 12 3Z"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+
                   Website
                 </div>
 
-                <p className="mt-1 text-[13px] text-white/55">
+                <p className="mt-2 text-[13px] text-white/55">
                   kampungpaluh.my.id
                 </p>
               </div>
+
+              {/* Back to top */}
+              <a
+                href="#top"
+                className="group inline-flex items-center gap-2 pt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#9de0bf]/70 transition-colors hover:text-[#9de0bf]"
+              >
+                Kembali ke atas
+
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="transition-transform duration-200 group-hover:-translate-y-0.5"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 19V5M6 11L12 5L18 11"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
             </div>
           </div>
         </div>
@@ -242,27 +238,57 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[11px] text-white/35">
-            © 2026 Kampung Paluh. Seluruh hak cipta dilindungi.
-          </p>
+          <div>
+            <p className="text-[11px] text-white/35">
+              © 2026 Kampung Paluh. Seluruh hak cipta dilindungi.
+            </p>
+          </div>
 
           <div className="flex items-center gap-5">
-            <a
-              href="#"
-              className="text-[11px] text-white/35 transition-colors hover:text-white/70"
-            >
-              Kebijakan Privasi
-            </a>
-
-            <a
-              href="#"
-              className="text-[11px] text-white/35 transition-colors hover:text-white/70"
-            >
-              Kontak
-            </a>
+            <span className="text-[11px] text-white/25">
+              Portal Promosi Kampung Paluh
+            </span>
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+/* -------------------------------------------------
+ * Footer Link
+ * ------------------------------------------------- */
+
+function FooterLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex w-fit items-center gap-2 text-[13px] text-white/55 transition-all duration-200 hover:translate-x-1 hover:text-white"
+    >
+      <span>{label}</span>
+
+      <svg
+        width="11"
+        height="11"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-60"
+        aria-hidden="true"
+      >
+        <path
+          d="M9 5L16 12L9 19"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Link>
   );
 }
