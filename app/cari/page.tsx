@@ -524,7 +524,7 @@ function SearchCard({
         </div>
 
       </div>
-
+{/* update */}
       <div className="p-5">
 
         {item.meta && (
