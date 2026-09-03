@@ -29,15 +29,22 @@ export interface NewsData {
   slug: string;
   ringkasan: string;
   isi: string;
-
   kategori: NewsCategory;
   penulis: string;
   tanggal: string;
 
+  // URL gambar dari Cloudinary
   foto: string;
+
+  // Public ID gambar dari Cloudinary
+  fotoPath?: string;
 
   status: "aktif" | "nonaktif";
 }
+
+/* =========================================================
+   GET ALL NEWS
+========================================================= */
 
 export async function getNews(): Promise<NewsData[]> {
   const newsRef = collection(
@@ -52,11 +59,39 @@ export async function getNews(): Promise<NewsData[]> {
 
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((item) => ({
-    id: item.id,
-    ...(item.data() as Omit<NewsData, "id">),
-  }));
+  return snapshot.docs.map((item) => {
+    const data = item.data();
+
+    return {
+      id: item.id,
+
+      judul: data.judul ?? "",
+      slug: data.slug ?? "",
+      ringkasan: data.ringkasan ?? "",
+      isi: data.isi ?? "",
+
+      kategori:
+        data.kategori ?? "Lainnya",
+
+      penulis: data.penulis ?? "",
+      tanggal: data.tanggal ?? "",
+
+      foto: data.foto ?? "",
+
+      // Mendukung data lama
+      fotoPath: data.fotoPath ?? "",
+
+      status:
+        data.status === "nonaktif"
+          ? "nonaktif"
+          : "aktif",
+    };
+  });
 }
+
+/* =========================================================
+   CREATE NEWS
+========================================================= */
 
 export async function createNews(
   data: NewsData
@@ -71,12 +106,15 @@ export async function createNews(
     slug: data.slug,
     ringkasan: data.ringkasan,
     isi: data.isi,
-
     kategori: data.kategori,
     penulis: data.penulis,
     tanggal: data.tanggal,
 
+    // URL Cloudinary
     foto: data.foto,
+
+    // Public ID Cloudinary
+    fotoPath: data.fotoPath ?? "",
 
     status: data.status,
 
@@ -86,6 +124,10 @@ export async function createNews(
 
   return document.id;
 }
+
+/* =========================================================
+   UPDATE NEWS
+========================================================= */
 
 export async function updateNews(
   id: string,
@@ -102,18 +144,25 @@ export async function updateNews(
     slug: data.slug,
     ringkasan: data.ringkasan,
     isi: data.isi,
-
     kategori: data.kategori,
     penulis: data.penulis,
     tanggal: data.tanggal,
 
+    // Update URL Cloudinary
     foto: data.foto,
+
+    // Update Public ID Cloudinary
+    fotoPath: data.fotoPath ?? "",
 
     status: data.status,
 
     updatedAt: serverTimestamp(),
   });
 }
+
+/* =========================================================
+   DELETE NEWS
+========================================================= */
 
 export async function deleteNews(
   id: string

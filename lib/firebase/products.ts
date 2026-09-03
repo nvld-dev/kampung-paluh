@@ -23,14 +23,23 @@ export interface ProductData {
   id?: string;
 
   nama: string;
+
   tipe: ProductType;
+
   idUmkm: string | null;
+
   penjual: string;
 
   kategori: string;
+
   deskripsi: string;
+
   harga: number | null;
+
   foto: string;
+
+  // ID/path gambar di Cloudinary
+  fotoPath?: string;
 
   status: "aktif" | "nonaktif";
 }
@@ -64,18 +73,27 @@ export async function createProduct(
 
   const document = await addDoc(productsRef, {
     nama: data.nama,
+
     tipe: data.tipe,
+
     idUmkm: data.idUmkm,
+
     penjual: data.penjual,
 
     kategori: data.kategori,
+
     deskripsi: data.deskripsi,
+
     harga: data.harga,
+
     foto: data.foto,
+
+    fotoPath: data.fotoPath || "",
 
     status: data.status,
 
     createdAt: serverTimestamp(),
+
     updatedAt: serverTimestamp(),
   });
 
@@ -94,14 +112,22 @@ export async function updateProduct(
 
   await updateDoc(productRef, {
     nama: data.nama,
+
     tipe: data.tipe,
+
     idUmkm: data.idUmkm,
+
     penjual: data.penjual,
 
     kategori: data.kategori,
+
     deskripsi: data.deskripsi,
+
     harga: data.harga,
+
     foto: data.foto,
+
+    fotoPath: data.fotoPath || "",
 
     status: data.status,
 

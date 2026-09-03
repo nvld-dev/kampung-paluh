@@ -10,6 +10,8 @@ import {
   updateNews,
 } from "@/lib/firebase/news";
 
+import ImageUpload from "@/components/admin/ImageUpload";
+
 const initialForm: NewsData = {
   judul: "",
   slug: "",
@@ -19,6 +21,7 @@ const initialForm: NewsData = {
   penulis: "",
   tanggal: "",
   foto: "",
+  fotoPath: "",
   status: "aktif",
 };
 
@@ -60,6 +63,10 @@ export default function BeritaAdminPage() {
     loadNews();
   }, []);
 
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
+
   async function loadNews() {
     try {
       setLoading(true);
@@ -82,6 +89,10 @@ export default function BeritaAdminPage() {
     }
   }
 
+  /* =========================================================
+     SLUG
+  ========================================================= */
+
   function createSlug(value: string) {
     return value
       .toLowerCase()
@@ -90,6 +101,10 @@ export default function BeritaAdminPage() {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-");
   }
+
+  /* =========================================================
+     FORM CHANGE
+  ========================================================= */
 
   function handleChange(
     event: React.ChangeEvent<
@@ -118,12 +133,89 @@ export default function BeritaAdminPage() {
     }));
   }
 
+  /* =========================================================
+     CLOUDINARY FOTO
+  ========================================================= */
+
+  function handlePhotoUpload(image: {
+    url: string;
+    publicId: string;
+  }) {
+    setForm((previous) => ({
+      ...previous,
+      foto: image.url,
+      fotoPath: image.publicId,
+    }));
+  }
+
+  async function deleteCloudinaryImage(
+    publicId: string
+  ) {
+    if (!publicId) return;
+
+    try {
+      const response = await fetch(
+        "/api/cloudinary/delete",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            publicId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error(
+          "Gagal menghapus foto Cloudinary:",
+          result
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Gagal menghubungi API Cloudinary:",
+        error
+      );
+    }
+  }
+
+  async function handlePhotoRemove() {
+    const publicId =
+      form.fotoPath ?? "";
+
+    /*
+     * Hapus file dari Cloudinary
+     * jika foto berasal dari Cloudinary.
+     */
+    if (publicId) {
+      await deleteCloudinaryImage(
+        publicId
+      );
+    }
+
+    setForm((previous) => ({
+      ...previous,
+      foto: "",
+      fotoPath: "",
+    }));
+  }
+
+  /* =========================================================
+     CREATE
+  ========================================================= */
+
   function openCreate() {
     setForm({
       ...initialForm,
       tanggal: new Date()
         .toISOString()
         .split("T")[0],
+      foto: "",
+      fotoPath: "",
     });
 
     setEditingId(null);
@@ -131,6 +223,10 @@ export default function BeritaAdminPage() {
     setError("");
     setShowForm(true);
   }
+
+  /* =========================================================
+     EDIT
+  ========================================================= */
 
   function openEdit(item: NewsData) {
     setForm({
@@ -143,6 +239,7 @@ export default function BeritaAdminPage() {
       penulis: item.penulis ?? "",
       tanggal: item.tanggal ?? "",
       foto: item.foto ?? "",
+      fotoPath: item.fotoPath ?? "",
       status: item.status ?? "aktif",
     });
 
@@ -152,11 +249,24 @@ export default function BeritaAdminPage() {
     setShowForm(true);
   }
 
+  /* =========================================================
+     CLOSE
+  ========================================================= */
+
   function closeForm() {
     setShowForm(false);
     setEditingId(null);
-    setForm(initialForm);
+
+    setForm({
+      ...initialForm,
+      foto: "",
+      fotoPath: "",
+    });
   }
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -201,20 +311,32 @@ export default function BeritaAdminPage() {
       return;
     }
 
+    const newsData: NewsData = {
+      ...form,
+
+      judul: form.judul.trim(),
+      slug: form.slug.trim(),
+      ringkasan: form.ringkasan.trim(),
+      isi: form.isi.trim(),
+      penulis: form.penulis.trim(),
+      foto: form.foto.trim(),
+      fotoPath: form.fotoPath?.trim() ?? "",
+    };
+
     try {
       setSaving(true);
 
       if (editingId) {
         await updateNews(
           editingId,
-          form
+          newsData
         );
 
         setMessage(
           "Berita berhasil diperbarui."
         );
       } else {
-        await createNews(form);
+        await createNews(newsData);
 
         setMessage(
           "Berita berhasil ditambahkan."
@@ -238,6 +360,10 @@ export default function BeritaAdminPage() {
     }
   }
 
+  /* =========================================================
+     DELETE
+  ========================================================= */
+
   async function handleDelete(
     item: NewsData
   ) {
@@ -253,7 +379,20 @@ export default function BeritaAdminPage() {
       setError("");
       setMessage("");
 
+      /*
+       * Hapus dokumen Firestore terlebih dahulu.
+       */
       await deleteNews(item.id);
+
+      /*
+       * Setelah dokumen berhasil dihapus,
+       * hapus gambar dari Cloudinary.
+       */
+      if (item.fotoPath) {
+        await deleteCloudinaryImage(
+          item.fotoPath
+        );
+      }
 
       setMessage(
         "Berita berhasil dihapus."
@@ -272,6 +411,10 @@ export default function BeritaAdminPage() {
     }
   }
 
+  /* =========================================================
+     FORMAT DATE
+  ========================================================= */
+
   function formatDate(
     date: string
   ) {
@@ -288,6 +431,10 @@ export default function BeritaAdminPage() {
       }
     );
   }
+
+  /* =========================================================
+     RETURN
+  ========================================================= */
 
   return (
     <div className="p-6 lg:p-8">
@@ -322,7 +469,6 @@ export default function BeritaAdminPage() {
 
           Tambah Berita
         </button>
-
       </div>
 
       {/* ALERT */}
@@ -656,7 +802,9 @@ export default function BeritaAdminPage() {
 
       </section>
 
-      {/* MODAL */}
+      {/* =====================================================
+          MODAL
+      ====================================================== */}
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a110e]/45 p-4 backdrop-blur-sm">
@@ -895,39 +1043,26 @@ export default function BeritaAdminPage() {
 
                 </div>
 
-                {/* FOTO */}
+                {/* =====================================================
+                    FOTO
+                ====================================================== */}
 
                 <div>
 
-                  <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
-                    URL Foto
-                  </label>
-
-                  <input
-                    name="foto"
+                  <ImageUpload
+                    label="Foto Berita"
+                    folder="berita"
                     value={form.foto}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                    className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
+                    publicId={
+                      form.fotoPath ?? ""
+                    }
+                    onUpload={
+                      handlePhotoUpload
+                    }
+                    onRemove={
+                      handlePhotoRemove
+                    }
                   />
-
-                  <p className="mt-2 text-[10px] text-[#9aa39f]">
-                    Untuk sementara gunakan URL
-                    foto. Firebase Storage akan
-                    ditambahkan kemudian.
-                  </p>
-
-                  {form.foto && (
-                    <div className="mt-3 h-40 overflow-hidden rounded-xl bg-[#edf2ef]">
-
-                      <img
-                        src={form.foto}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                      />
-
-                    </div>
-                  )}
 
                 </div>
 

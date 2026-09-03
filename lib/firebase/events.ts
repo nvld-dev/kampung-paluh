@@ -16,17 +16,18 @@ export const EVENTS_COLLECTION = "events";
 
 export interface EventData {
   id?: string;
-
   judul: string;
   slug: string;
   deskripsi: string;
-
   tanggal: string;
   waktu: string;
   lokasi: string;
 
-  // Satu kegiatan dapat memiliki banyak foto
+  // URL foto dari Cloudinary
   foto: string[];
+
+  // Public ID foto dari Cloudinary
+  fotoPaths?: string[];
 
   status: "aktif" | "nonaktif";
 }
@@ -36,10 +37,7 @@ export interface EventData {
 ========================================================= */
 
 export async function getEvents(): Promise<EventData[]> {
-  const eventsRef = collection(
-    db,
-    EVENTS_COLLECTION
-  );
+  const eventsRef = collection(db, EVENTS_COLLECTION);
 
   const q = query(
     eventsRef,
@@ -57,16 +55,22 @@ export async function getEvents(): Promise<EventData[]> {
       judul: data.judul ?? "",
       slug: data.slug ?? "",
       deskripsi: data.deskripsi ?? "",
-
       tanggal: data.tanggal ?? "",
       waktu: data.waktu ?? "",
       lokasi: data.lokasi ?? "",
 
-      // Pastikan selalu berupa array
+      // Pastikan foto selalu berupa array
       foto: Array.isArray(data.foto)
         ? data.foto
         : data.foto
           ? [data.foto]
+          : [],
+
+      // Pastikan fotoPaths selalu berupa array
+      fotoPaths: Array.isArray(data.fotoPaths)
+        ? data.fotoPaths
+        : data.fotoPaths
+          ? [data.fotoPaths]
           : [],
 
       status:
@@ -93,13 +97,15 @@ export async function createEvent(
     judul: data.judul,
     slug: data.slug,
     deskripsi: data.deskripsi,
-
     tanggal: data.tanggal,
     waktu: data.waktu,
     lokasi: data.lokasi,
 
-    // Simpan semua foto sebagai array
+    // Simpan URL foto Cloudinary
     foto: data.foto,
+
+    // Simpan public ID Cloudinary
+    fotoPaths: data.fotoPaths ?? [],
 
     status: data.status,
 
@@ -128,13 +134,15 @@ export async function updateEvent(
     judul: data.judul,
     slug: data.slug,
     deskripsi: data.deskripsi,
-
     tanggal: data.tanggal,
     waktu: data.waktu,
     lokasi: data.lokasi,
 
-    // Update semua foto
+    // Update URL foto
     foto: data.foto,
+
+    // Update public ID foto
+    fotoPaths: data.fotoPaths ?? [],
 
     status: data.status,
 

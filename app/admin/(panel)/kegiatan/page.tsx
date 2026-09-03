@@ -10,6 +10,8 @@ import {
   updateEvent,
 } from "@/lib/firebase/events";
 
+import ImageUpload from "@/components/admin/ImageUpload";
+
 const initialForm: EventData = {
   judul: "",
   slug: "",
@@ -18,6 +20,7 @@ const initialForm: EventData = {
   waktu: "",
   lokasi: "",
   foto: [],
+  fotoPaths: [],
   status: "aktif",
 };
 
@@ -52,10 +55,7 @@ export default function KegiatanAdminPage() {
 
       setEvents(data);
     } catch (error) {
-      console.error(
-        "Gagal mengambil kegiatan:",
-        error
-      );
+      console.error("Gagal mengambil kegiatan:", error);
 
       setError(
         "Data kegiatan gagal dimuat. Periksa Firestore Rules."
@@ -110,34 +110,102 @@ export default function KegiatanAdminPage() {
   }
 
   /* =========================================================
-     FOTO
+     FOTO - CLOUDINARY
   ========================================================= */
 
   function addPhoto() {
     setForm((previous) => ({
       ...previous,
       foto: [...previous.foto, ""],
+      fotoPaths: [
+        ...(previous.fotoPaths ?? []),
+        "",
+      ],
     }));
   }
 
-  function updatePhoto(
+  function handlePhotoUpload(
     index: number,
-    value: string
+    image: {
+      url: string;
+      publicId: string;
+    }
   ) {
-    setForm((previous) => ({
-      ...previous,
-      foto: previous.foto.map((photo, photoIndex) =>
-        photoIndex === index
-          ? value
-          : photo
-      ),
-    }));
+    setForm((previous) => {
+      const foto = [...previous.foto];
+      const fotoPaths = [
+        ...(previous.fotoPaths ?? []),
+      ];
+
+      foto[index] = image.url;
+      fotoPaths[index] = image.publicId;
+
+      return {
+        ...previous,
+        foto,
+        fotoPaths,
+      };
+    });
   }
 
-  function removePhoto(index: number) {
+  async function deleteCloudinaryImage(
+    publicId: string
+  ) {
+    if (!publicId) return;
+
+    try {
+      const response = await fetch(
+        "/api/cloudinary/delete",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            publicId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error(
+          "Gagal menghapus foto Cloudinary:",
+          result
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Gagal menghubungi API Cloudinary:",
+        error
+      );
+    }
+  }
+
+  async function removePhoto(index: number) {
+    const publicId =
+      form.fotoPaths?.[index] ?? "";
+
+    /*
+     * Hapus file dari Cloudinary jika
+     * foto tersebut memang sudah diupload.
+     */
+    if (publicId) {
+      await deleteCloudinaryImage(publicId);
+    }
+
     setForm((previous) => ({
       ...previous,
+
       foto: previous.foto.filter(
+        (_, photoIndex) =>
+          photoIndex !== index
+      ),
+
+      fotoPaths: (
+        previous.fotoPaths ?? []
+      ).filter(
         (_, photoIndex) =>
           photoIndex !== index
       ),
@@ -152,6 +220,7 @@ export default function KegiatanAdminPage() {
     setForm({
       ...initialForm,
       foto: [],
+      fotoPaths: [],
     });
 
     setEditingId(null);
@@ -165,6 +234,29 @@ export default function KegiatanAdminPage() {
   ========================================================= */
 
   function openEdit(item: EventData) {
+    const photos = Array.isArray(item.foto)
+      ? item.foto
+      : item.foto
+        ? [item.foto]
+        : [];
+
+    const paths = Array.isArray(item.fotoPaths)
+      ? item.fotoPaths
+      : item.fotoPaths
+        ? [item.fotoPaths]
+        : [];
+
+    /*
+     * Pastikan jumlah fotoPaths mengikuti
+     * jumlah foto.
+     *
+     * Ini juga menjaga kompatibilitas
+     * dengan data kegiatan lama.
+     */
+    const normalizedPaths = photos.map(
+      (_, index) => paths[index] ?? ""
+    );
+
     setForm({
       judul: item.judul ?? "",
       slug: item.slug ?? "",
@@ -173,12 +265,8 @@ export default function KegiatanAdminPage() {
       waktu: item.waktu ?? "",
       lokasi: item.lokasi ?? "",
 
-      // Mendukung data lama maupun data baru
-      foto: Array.isArray(item.foto)
-        ? item.foto
-        : item.foto
-          ? [item.foto]
-          : [],
+      foto: photos,
+      fotoPaths: normalizedPaths,
 
       status: item.status ?? "aktif",
     });
@@ -200,6 +288,7 @@ export default function KegiatanAdminPage() {
     setForm({
       ...initialForm,
       foto: [],
+      fotoPaths: [],
     });
   }
 
@@ -216,37 +305,50 @@ export default function KegiatanAdminPage() {
     setError("");
 
     if (!form.judul.trim()) {
-      setError(
-        "Judul kegiatan wajib diisi."
-      );
+      setError("Judul kegiatan wajib diisi.");
       return;
     }
 
     if (!form.tanggal) {
-      setError(
-        "Tanggal kegiatan wajib diisi."
-      );
+      setError("Tanggal kegiatan wajib diisi.");
       return;
     }
 
     if (!form.lokasi.trim()) {
-      setError(
-        "Lokasi kegiatan wajib diisi."
-      );
+      setError("Lokasi kegiatan wajib diisi.");
       return;
     }
 
     /*
-     * Hapus URL kosong agar Firestore
-     * hanya menyimpan foto yang benar-benar ada.
+     * Hanya simpan foto yang memiliki URL.
+     * fotoPaths mengikuti index foto.
      */
-    const cleanedPhotos = form.foto
-      .map((photo) => photo.trim())
-      .filter(Boolean);
+    const cleanedPhotos: string[] = [];
+    const cleanedPhotoPaths: string[] = [];
+
+    form.foto.forEach((photo, index) => {
+      const cleanPhoto = photo.trim();
+
+      if (!cleanPhoto) return;
+
+      cleanedPhotos.push(cleanPhoto);
+      cleanedPhotoPaths.push(
+        form.fotoPaths?.[index] ?? ""
+      );
+    });
 
     const eventData: EventData = {
       ...form,
+
+      judul: form.judul.trim(),
+      slug: form.slug.trim(),
+      deskripsi: form.deskripsi.trim(),
+      tanggal: form.tanggal,
+      waktu: form.waktu.trim(),
+      lokasi: form.lokasi.trim(),
+
       foto: cleanedPhotos,
+      fotoPaths: cleanedPhotoPaths,
     };
 
     try {
@@ -305,7 +407,25 @@ export default function KegiatanAdminPage() {
       setError("");
       setMessage("");
 
+      /*
+       * Hapus dokumen Firestore terlebih dahulu.
+       */
       await deleteEvent(item.id);
+
+      /*
+       * Setelah dokumen berhasil dihapus,
+       * hapus seluruh foto dari Cloudinary.
+       */
+      const photoPaths =
+        item.fotoPaths ?? [];
+
+      for (const publicId of photoPaths) {
+        if (publicId) {
+          await deleteCloudinaryImage(
+            publicId
+          );
+        }
+      }
 
       setMessage(
         "Kegiatan berhasil dihapus."
@@ -865,7 +985,7 @@ export default function KegiatanAdminPage() {
                       value={form.waktu}
                       onChange={handleChange}
                       placeholder="Contoh: 08.00 - 12.00 WIB"
-                      className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
+                      className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 py-3 text-[12px] text-[#37413d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     />
                   </div>
 
@@ -942,8 +1062,8 @@ export default function KegiatanAdminPage() {
                       </label>
 
                       <p className="mt-1 text-[10px] text-[#9aa39f]">
-                        Tambahkan beberapa URL foto
-                        untuk satu kegiatan.
+                        Upload beberapa foto untuk
+                        satu kegiatan.
                       </p>
                     </div>
 
@@ -961,6 +1081,7 @@ export default function KegiatanAdminPage() {
 
                     {form.foto.length === 0 ? (
                       <div className="rounded-xl border border-dashed border-[#d8e2dc] bg-[#fafcfb] px-4 py-5 text-center">
+
                         <p className="text-[11px] text-[#8a9490]">
                           Belum ada foto.
                         </p>
@@ -972,75 +1093,57 @@ export default function KegiatanAdminPage() {
                         >
                           Tambahkan foto pertama
                         </button>
+
                       </div>
                     ) : (
                       form.foto.map(
                         (photo, index) => (
                           <div
-                            key={index}
+                            key={`${index}-${form.fotoPaths?.[index] ?? "empty"}`}
                             className="rounded-xl border border-[#e0e7e3] bg-[#fafcfb] p-3"
                           >
 
-                            <div className="flex gap-3">
+                            <div className="mb-3 flex items-center justify-between">
 
-                              <div className="flex-1">
+                              <span className="text-[10px] font-semibold text-[#59645f]">
+                                Foto{" "}
+                                {index + 1}
+                              </span>
 
-                                <div className="mb-2 flex items-center justify-between">
-
-                                  <span className="text-[10px] font-semibold text-[#59645f]">
-                                    Foto{" "}
-                                    {index + 1}
-                                  </span>
-
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      removePhoto(
-                                        index
-                                      )
-                                    }
-                                    className="text-[10px] font-semibold text-[#a15f5a] hover:underline"
-                                  >
-                                    Hapus
-                                  </button>
-
-                                </div>
-
-                                <input
-                                  type="url"
-                                  value={photo}
-                                  onChange={(event) =>
-                                    updatePhoto(
-                                      index,
-                                      event.target
-                                        .value
-                                    )
-                                  }
-                                  placeholder="https://..."
-                                  className="h-11 w-full rounded-lg border border-[#dfe6e2] bg-white px-3 text-[12px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
-                                />
-
-                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removePhoto(
+                                    index
+                                  )
+                                }
+                                disabled={saving}
+                                className="text-[10px] font-semibold text-[#a15f5a] hover:underline disabled:opacity-50"
+                              >
+                                Hapus
+                              </button>
 
                             </div>
 
-                            {photo.trim() && (
-                              <div className="mt-3 h-32 overflow-hidden rounded-lg bg-[#edf2ef]">
-
-                                <img
-                                  src={photo}
-                                  alt={`Preview foto ${
-                                    index + 1
-                                  }`}
-                                  className="h-full w-full object-cover"
-                                  onError={(event) => {
-                                    event.currentTarget.style.display =
-                                      "none";
-                                  }}
-                                />
-
-                              </div>
-                            )}
+                            <ImageUpload
+                              label=""
+                              folder="kegiatan"
+                              value={photo}
+                              publicId={
+                                form
+                                  .fotoPaths?.[
+                                  index
+                                ] ?? ""
+                              }
+                              onUpload={(
+                                image
+                              ) =>
+                                handlePhotoUpload(
+                                  index,
+                                  image
+                                )
+                              }
+                            />
 
                           </div>
                         )

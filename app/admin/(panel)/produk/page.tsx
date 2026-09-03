@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import ImageUpload from "@/components/admin/ImageUpload";
+
 import {
   createProduct,
   deleteProduct,
@@ -24,6 +26,7 @@ const initialForm: ProductData = {
   deskripsi: "",
   harga: null,
   foto: "",
+  fotoPath: "",
   status: "aktif",
 };
 
@@ -52,8 +55,11 @@ const categories = [
 ];
 
 export default function ProdukAdminPage() {
-  const [products, setProducts] = useState<ProductData[]>([]);
-  const [umkm, setUmkm] = useState<UmkmData[]>([]);
+  const [products, setProducts] =
+    useState<ProductData[]>([]);
+
+  const [umkm, setUmkm] =
+    useState<UmkmData[]>([]);
 
   const [form, setForm] =
     useState<ProductData>(initialForm);
@@ -61,13 +67,24 @@ export default function ProdukAdminPage() {
   const [editingId, setEditingId] =
     useState<string | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [showForm, setShowForm] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
+
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
 
   useEffect(() => {
     loadData();
@@ -100,6 +117,10 @@ export default function ProdukAdminPage() {
     }
   }
 
+  /* =========================================================
+     FORM
+  ========================================================= */
+
   function handleChange(
     event: React.ChangeEvent<
       HTMLInputElement |
@@ -107,7 +128,8 @@ export default function ProdukAdminPage() {
         HTMLSelectElement
     >
   ) {
-    const { name, value } = event.target;
+    const { name, value } =
+      event.target;
 
     setForm((previous) => ({
       ...previous,
@@ -118,12 +140,15 @@ export default function ProdukAdminPage() {
   function handlePriceChange(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
-    const value = event.target.value;
+    const value =
+      event.target.value;
 
     setForm((previous) => ({
       ...previous,
       harga:
-        value === "" ? null : Number(value),
+        value === ""
+          ? null
+          : Number(value),
     }));
   }
 
@@ -135,16 +160,14 @@ export default function ProdukAdminPage() {
 
     setForm((previous) => ({
       ...previous,
+
       tipe,
 
-      // UMKM hanya menyimpan idUmkm
-      // selain UMKM tidak membutuhkan idUmkm
       idUmkm:
         tipe === "umkm"
           ? previous.idUmkm
           : null,
 
-      // Perorangan hanya membutuhkan nama penjual
       penjual:
         tipe === "perorangan"
           ? previous.penjual
@@ -164,33 +187,97 @@ export default function ProdukAdminPage() {
     setShowForm(true);
   }
 
-  function openEdit(item: ProductData) {
+  function openEdit(
+    item: ProductData
+  ) {
     setForm({
       nama: item.nama ?? "",
-      tipe: item.tipe ?? "umkm",
-      idUmkm: item.idUmkm ?? null,
-      penjual: item.penjual ?? "",
-      kategori: item.kategori ?? "",
-      deskripsi: item.deskripsi ?? "",
-      harga: item.harga ?? null,
-      foto: item.foto ?? "",
-      status: item.status ?? "aktif",
+
+      tipe:
+        item.tipe ?? "umkm",
+
+      idUmkm:
+        item.idUmkm ?? null,
+
+      penjual:
+        item.penjual ?? "",
+
+      kategori:
+        item.kategori ?? "",
+
+      deskripsi:
+        item.deskripsi ?? "",
+
+      harga:
+        item.harga ?? null,
+
+      foto:
+        item.foto ?? "",
+
+      fotoPath:
+        item.fotoPath ?? "",
+
+      status:
+        item.status ?? "aktif",
     });
 
-    setEditingId(item.id ?? null);
+    setEditingId(
+      item.id ?? null
+    );
+
     setMessage("");
     setError("");
     setShowForm(true);
   }
 
   function closeForm() {
+    if (saving) return;
+
     setShowForm(false);
+
     setEditingId(null);
+
     setForm({
       ...initialForm,
       idUmkm: null,
     });
+
+    setError("");
   }
+
+  /* =========================================================
+     FOTO
+  ========================================================= */
+
+  function handlePhotoUpload(
+    image: {
+      url: string;
+      publicId: string;
+    }
+  ) {
+    setForm((previous) => ({
+      ...previous,
+
+      foto: image.url,
+
+      fotoPath:
+        image.publicId,
+    }));
+  }
+
+  function handlePhotoRemove() {
+    setForm((previous) => ({
+      ...previous,
+
+      foto: "",
+
+      fotoPath: "",
+    }));
+  }
+
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
@@ -200,13 +287,18 @@ export default function ProdukAdminPage() {
     setMessage("");
     setError("");
 
-    // Nama wajib
+    /* Nama */
+
     if (!form.nama.trim()) {
-      setError("Nama produk wajib diisi.");
+      setError(
+        "Nama produk wajib diisi."
+      );
+
       return;
     }
 
-    // UMKM wajib memilih UMKM
+    /* UMKM */
+
     if (
       form.tipe === "umkm" &&
       !form.idUmkm
@@ -214,10 +306,12 @@ export default function ProdukAdminPage() {
       setError(
         "Pilih UMKM pemilik produk."
       );
+
       return;
     }
 
-    // Perorangan wajib mengisi nama penjual
+    /* Perorangan */
+
     if (
       form.tipe === "perorangan" &&
       !form.penjual.trim()
@@ -225,31 +319,57 @@ export default function ProdukAdminPage() {
       setError(
         "Nama penjual wajib diisi."
       );
+
       return;
     }
 
-    // Kategori wajib
+    /* Kategori */
+
     if (!form.kategori) {
       setError(
         "Kategori produk wajib dipilih."
       );
+
       return;
     }
 
     try {
       setSaving(true);
 
+      const payload: ProductData = {
+        ...form,
+
+        nama: form.nama.trim(),
+
+        penjual:
+          form.penjual.trim(),
+
+        kategori:
+          form.kategori.trim(),
+
+        deskripsi:
+          form.deskripsi.trim(),
+
+        foto:
+          form.foto.trim(),
+
+        fotoPath:
+          form.fotoPath?.trim() || "",
+      };
+
       if (editingId) {
         await updateProduct(
           editingId,
-          form
+          payload
         );
 
         setMessage(
           "Produk berhasil diperbarui."
         );
       } else {
-        await createProduct(form);
+        await createProduct(
+          payload
+        );
 
         setMessage(
           "Produk berhasil ditambahkan."
@@ -266,21 +386,32 @@ export default function ProdukAdminPage() {
       );
 
       setError(
-        "Produk gagal disimpan."
+        "Produk gagal disimpan. Silakan coba lagi."
       );
     } finally {
       setSaving(false);
     }
   }
 
+  /* =========================================================
+     DELETE
+  ========================================================= */
+
   async function handleDelete(
     item: ProductData
   ) {
-    if (!item.id) return;
+    if (!item.id) {
+      setError(
+        "ID produk tidak ditemukan."
+      );
 
-    const confirmed = window.confirm(
-      `Hapus produk "${item.nama}"?`
-    );
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Hapus produk "${item.nama}"?\n\nData yang sudah dihapus tidak dapat dikembalikan.`
+      );
 
     if (!confirmed) return;
 
@@ -288,7 +419,58 @@ export default function ProdukAdminPage() {
       setError("");
       setMessage("");
 
-      await deleteProduct(item.id);
+      /*
+       * Hapus foto dari Cloudinary
+       * jika memiliki public ID.
+       */
+
+      if (
+        item.fotoPath &&
+        item.fotoPath.trim()
+      ) {
+        try {
+          const response =
+            await fetch(
+              "/api/cloudinary/delete",
+              {
+                method: "DELETE",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+
+                body: JSON.stringify({
+                  publicId:
+                    item.fotoPath,
+                }),
+
+                cache: "no-store",
+              }
+            );
+
+          const text =
+            await response.text();
+
+          if (!response.ok) {
+            console.error(
+              "Gagal menghapus foto Cloudinary:",
+              text
+            );
+          }
+        } catch (mediaError) {
+          console.error(
+            "Gagal menghapus foto Cloudinary:",
+            mediaError
+          );
+        }
+      }
+
+      /* Hapus data Firestore */
+
+      await deleteProduct(
+        item.id
+      );
 
       setMessage(
         "Produk berhasil dihapus."
@@ -302,10 +484,14 @@ export default function ProdukAdminPage() {
       );
 
       setError(
-        "Produk gagal dihapus."
+        "Produk gagal dihapus. Silakan coba lagi."
       );
     }
   }
+
+  /* =========================================================
+     SOURCE
+  ========================================================= */
 
   function getUmkmName(
     id: string | null
@@ -316,23 +502,31 @@ export default function ProdukAdminPage() {
 
     return (
       umkm.find(
-        (item) => item.id === id
-      )?.nama ?? "UMKM tidak ditemukan"
+        (item) =>
+          item.id === id
+      )?.nama ??
+      "UMKM tidak ditemukan"
     );
   }
 
   function getSourceName(
     item: ProductData
   ) {
-    if (item.tipe === "umkm") {
+    if (
+      item.tipe === "umkm"
+    ) {
       return getUmkmName(
         item.idUmkm
       );
     }
 
-    if (item.tipe === "perorangan") {
-      return item.penjual ||
-        "Perorangan";
+    if (
+      item.tipe === "perorangan"
+    ) {
+      return (
+        item.penjual ||
+        "Perorangan"
+      );
     }
 
     return "Produk Kampung";
@@ -341,11 +535,15 @@ export default function ProdukAdminPage() {
   function getSourceLabel(
     tipe: ProductData["tipe"]
   ) {
-    if (tipe === "umkm") {
+    if (
+      tipe === "umkm"
+    ) {
       return "UMKM";
     }
 
-    if (tipe === "perorangan") {
+    if (
+      tipe === "perorangan"
+    ) {
       return "Perorangan";
     }
 
@@ -353,7 +551,10 @@ export default function ProdukAdminPage() {
   }
 
   function formatPrice(
-    price: number | null | undefined
+    price:
+      | number
+      | null
+      | undefined
   ) {
     if (
       price === null ||
@@ -367,6 +568,10 @@ export default function ProdukAdminPage() {
     )}`;
   }
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <div className="p-6 lg:p-8">
 
@@ -377,6 +582,7 @@ export default function ProdukAdminPage() {
       <div className="flex flex-col gap-5 border-b border-[#e5ebe7] pb-6 sm:flex-row sm:items-end sm:justify-between">
 
         <div>
+
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#2e8066]">
             Potensi Lokal
           </div>
@@ -390,6 +596,7 @@ export default function ProdukAdminPage() {
             dipromosikan melalui Portal
             Kampung Paluh.
           </p>
+
         </div>
 
         <button
@@ -417,6 +624,7 @@ export default function ProdukAdminPage() {
 
           Tambah Produk
         </button>
+
       </div>
 
       {/* =====================================================
@@ -442,6 +650,7 @@ export default function ProdukAdminPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
 
         <div className="rounded-2xl border border-[#e4ebe7] bg-white p-5">
+
           <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#8a9490]">
             Total Produk
           </div>
@@ -449,9 +658,11 @@ export default function ProdukAdminPage() {
           <div className="mt-2 text-[26px] font-semibold tracking-[-0.04em] text-[#075b43]">
             {products.length}
           </div>
+
         </div>
 
         <div className="rounded-2xl border border-[#e4ebe7] bg-white p-5">
+
           <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#8a9490]">
             Produk Aktif
           </div>
@@ -465,9 +676,11 @@ export default function ProdukAdminPage() {
               ).length
             }
           </div>
+
         </div>
 
         <div className="rounded-2xl border border-[#e4ebe7] bg-white p-5">
+
           <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#8a9490]">
             UMKM Terdaftar
           </div>
@@ -475,6 +688,7 @@ export default function ProdukAdminPage() {
           <div className="mt-2 text-[26px] font-semibold tracking-[-0.04em] text-[#075b43]">
             {umkm.length}
           </div>
+
         </div>
 
       </div>
@@ -486,6 +700,7 @@ export default function ProdukAdminPage() {
       <section className="mt-6 overflow-hidden rounded-2xl border border-[#e4ebe7] bg-white">
 
         <div className="border-b border-[#edf1ef] px-6 py-5">
+
           <h2 className="text-[14px] font-semibold text-[#27322e]">
             Daftar Produk
           </h2>
@@ -493,16 +708,23 @@ export default function ProdukAdminPage() {
           <p className="mt-1 text-[11px] text-[#8a9490]">
             Produk yang tersimpan di Firestore.
           </p>
+
         </div>
 
         {loading ? (
+
           <div className="flex min-h-[250px] items-center justify-center">
+
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#dce8e2] border-t-[#075b43]" />
+
           </div>
+
         ) : products.length === 0 ? (
+
           <div className="flex min-h-[280px] flex-col items-center justify-center px-6 text-center">
 
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e9f1ed] text-[#075b43]">
+
               <svg
                 width="25"
                 height="25"
@@ -530,6 +752,7 @@ export default function ProdukAdminPage() {
                   strokeLinecap="round"
                 />
               </svg>
+
             </div>
 
             <h3 className="mt-4 text-[14px] font-semibold text-[#27322e]">
@@ -550,12 +773,15 @@ export default function ProdukAdminPage() {
             </button>
 
           </div>
+
         ) : (
+
           <div className="overflow-x-auto">
 
             <table className="w-full min-w-[950px] border-collapse">
 
               <thead>
+
                 <tr className="border-b border-[#edf1ef] bg-[#fafcfb]">
 
                   <th className="px-6 py-3 text-left text-[9px] font-semibold uppercase tracking-[0.12em] text-[#8a9490]">
@@ -583,168 +809,201 @@ export default function ProdukAdminPage() {
                   </th>
 
                 </tr>
+
               </thead>
 
               <tbody>
-                {products.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-[#f0f3f1] last:border-b-0 hover:bg-[#fbfcfb]"
-                  >
 
-                    {/* Produk */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                {products.map(
+                  (item) => (
+                    <tr
+                      key={item.id}
+                      className="border-b border-[#f0f3f1] last:border-b-0 hover:bg-[#fbfcfb]"
+                    >
 
-                        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-[#e9f1ed]">
+                      {/* Produk */}
 
-                          {item.foto ? (
-                            <img
-                              src={item.foto}
-                              alt={item.nama}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[#75a28f]">
-                              <svg
-                                width="19"
-                                height="19"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                              >
-                                <rect
-                                  x="4"
-                                  y="4"
-                                  width="16"
-                                  height="16"
-                                  rx="2"
-                                  stroke="currentColor"
-                                  strokeWidth="1.6"
-                                />
+                      <td className="px-6 py-4">
 
-                                <circle
-                                  cx="9"
-                                  cy="9"
-                                  r="1.5"
-                                  stroke="currentColor"
-                                  strokeWidth="1.5"
-                                />
+                        <div className="flex items-center gap-3">
 
-                                <path
-                                  d="M5 17L10 12L13 15L15 13L19 17"
-                                  stroke="currentColor"
-                                  strokeWidth="1.6"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-[#e9f1ed]">
+
+                            {item.foto ? (
+
+                              <img
+                                src={item.foto}
+                                alt={item.nama}
+                                className="h-full w-full object-cover"
+                              />
+
+                            ) : (
+
+                              <div className="flex h-full w-full items-center justify-center text-[#75a28f]">
+
+                                <svg
+                                  width="19"
+                                  height="19"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                >
+
+                                  <rect
+                                    x="4"
+                                    y="4"
+                                    width="16"
+                                    height="16"
+                                    rx="2"
+                                    stroke="currentColor"
+                                    strokeWidth="1.6"
+                                  />
+
+                                  <circle
+                                    cx="9"
+                                    cy="9"
+                                    r="1.5"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                  />
+
+                                  <path
+                                    d="M5 17L10 12L13 15L15 13L19 17"
+                                    stroke="currentColor"
+                                    strokeWidth="1.6"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+
+                                </svg>
+
+                              </div>
+
+                            )}
+
+                          </div>
+
+                          <div className="min-w-0">
+
+                            <div className="max-w-[230px] truncate text-[12px] font-semibold text-[#27322e]">
+                              {item.nama}
                             </div>
-                          )}
+
+                            <div className="mt-1 max-w-[230px] truncate text-[10px] text-[#9aa39f]">
+                              {item.deskripsi ||
+                                "Deskripsi belum tersedia"}
+                            </div>
+
+                          </div>
 
                         </div>
 
-                        <div className="min-w-0">
-                          <div className="max-w-[230px] truncate text-[12px] font-semibold text-[#27322e]">
-                            {item.nama}
-                          </div>
+                      </td>
 
-                          <div className="mt-1 max-w-[230px] truncate text-[10px] text-[#9aa39f]">
-                            {item.deskripsi ||
-                              "Deskripsi belum tersedia"}
-                          </div>
+                      {/* Sumber */}
+
+                      <td className="px-4 py-4">
+
+                        <div className="flex flex-col gap-1">
+
+                          <span className="text-[11px] font-medium text-[#53615b]">
+                            {getSourceName(
+                              item
+                            )}
+                          </span>
+
+                          <span className="w-fit rounded-full bg-[#edf5f0] px-2 py-0.5 text-[8px] font-semibold text-[#39705b]">
+                            {getSourceLabel(
+                              item.tipe
+                            )}
+                          </span>
+
                         </div>
 
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Sumber */}
-                    <td className="px-4 py-4">
-                      <div className="flex flex-col gap-1">
+                      {/* Kategori */}
 
-                        <span className="text-[11px] font-medium text-[#53615b]">
-                          {getSourceName(item)}
+                      <td className="px-4 py-4">
+
+                        <span className="rounded-full bg-[#edf5f0] px-2.5 py-1 text-[9px] font-medium text-[#39705b]">
+                          {item.kategori}
                         </span>
 
-                        <span className="w-fit rounded-full bg-[#edf5f0] px-2 py-0.5 text-[8px] font-semibold text-[#39705b]">
-                          {getSourceLabel(
-                            item.tipe
-                          )}
+                      </td>
+
+                      {/* Harga */}
+
+                      <td className="px-4 py-4 text-[11px] font-medium text-[#37413d]">
+                        {formatPrice(
+                          item.harga
+                        )}
+                      </td>
+
+                      {/* Status */}
+
+                      <td className="px-4 py-4">
+
+                        <span
+                          className={`
+                            rounded-full
+                            px-2.5
+                            py-1
+                            text-[9px]
+                            font-semibold
+                            ${
+                              item.status ===
+                              "aktif"
+                                ? "bg-[#e9f5ed] text-[#28714b]"
+                                : "bg-[#f3eeee] text-[#8a625d]"
+                            }
+                          `}
+                        >
+                          {item.status ===
+                          "aktif"
+                            ? "Aktif"
+                            : "Nonaktif"}
                         </span>
 
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Kategori */}
-                    <td className="px-4 py-4">
-                      <span className="rounded-full bg-[#edf5f0] px-2.5 py-1 text-[9px] font-medium text-[#39705b]">
-                        {item.kategori}
-                      </span>
-                    </td>
+                      {/* Aksi */}
 
-                    {/* Harga */}
-                    <td className="px-4 py-4 text-[11px] font-medium text-[#37413d]">
-                      {formatPrice(
-                        item.harga
-                      )}
-                    </td>
+                      <td className="px-6 py-4">
 
-                    {/* Status */}
-                    <td className="px-4 py-4">
+                        <div className="flex justify-end gap-2">
 
-                      <span
-                        className={`
-                          rounded-full
-                          px-2.5
-                          py-1
-                          text-[9px]
-                          font-semibold
-                          ${
-                            item.status ===
-                            "aktif"
-                              ? "bg-[#e9f5ed] text-[#28714b]"
-                              : "bg-[#f3eeee] text-[#8a625d]"
-                          }
-                        `}
-                      >
-                        {item.status ===
-                        "aktif"
-                          ? "Aktif"
-                          : "Nonaktif"}
-                      </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              openEdit(
+                                item
+                              )
+                            }
+                            className="rounded-lg border border-[#dfe6e2] px-3 py-2 text-[10px] font-semibold text-[#53615b] hover:bg-[#f5f8f6] hover:text-[#075b43]"
+                          >
+                            Edit
+                          </button>
 
-                    </td>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(
+                                item
+                              )
+                            }
+                            className="rounded-lg border border-[#eadbd8] px-3 py-2 text-[10px] font-semibold text-[#9a625d] hover:bg-[#fff5f3]"
+                          >
+                            Hapus
+                          </button>
 
-                    {/* Aksi */}
-                    <td className="px-6 py-4">
+                        </div>
 
-                      <div className="flex justify-end gap-2">
+                      </td>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openEdit(item)
-                          }
-                          className="rounded-lg border border-[#dfe6e2] px-3 py-2 text-[10px] font-semibold text-[#53615b] hover:bg-[#f5f8f6] hover:text-[#075b43]"
-                        >
-                          Edit
-                        </button>
+                    </tr>
+                  )
+                )}
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDelete(item)
-                          }
-                          className="rounded-lg border border-[#eadbd8] px-3 py-2 text-[10px] font-semibold text-[#9a625d] hover:bg-[#fff5f3]"
-                        >
-                          Hapus
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                ))}
               </tbody>
 
             </table>
@@ -759,14 +1018,17 @@ export default function ProdukAdminPage() {
       ====================================================== */}
 
       {showForm && (
+
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a110e]/45 p-4 backdrop-blur-sm">
 
           <div className="flex max-h-[90vh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-            {/* Header */}
+            {/* HEADER */}
+
             <div className="flex items-center justify-between border-b border-[#e5ebe7] px-6 py-5">
 
               <div>
+
                 <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#2e8066]">
                   {editingId
                     ? "Edit Data"
@@ -778,28 +1040,35 @@ export default function ProdukAdminPage() {
                     ? "Edit Produk"
                     : "Tambah Produk"}
                 </h2>
+
               </div>
 
               <button
                 type="button"
                 onClick={closeForm}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[#7d8883] hover:bg-[#f3f6f4]"
+                disabled={saving}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[#7d8883] hover:bg-[#f3f6f4] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 ×
               </button>
 
             </div>
 
-            {/* Form */}
+            {/* FORM */}
+
             <form
-              onSubmit={handleSubmit}
+              onSubmit={
+                handleSubmit
+              }
               className="overflow-y-auto"
             >
 
               <div className="grid gap-5 p-6">
 
                 {/* Nama */}
+
                 <div>
+
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Nama Produk
                   </label>
@@ -807,15 +1076,21 @@ export default function ProdukAdminPage() {
                   <input
                     name="nama"
                     value={form.nama}
-                    onChange={handleChange}
+                    onChange={
+                      handleChange
+                    }
                     placeholder="Contoh: Keripik Singkong"
                     required
+                    autoFocus
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   />
+
                 </div>
 
                 {/* Sumber Produk */}
+
                 <div>
+
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Sumber Produk
                   </label>
@@ -828,22 +1103,33 @@ export default function ProdukAdminPage() {
                     }
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   >
+
                     {productTypes.map(
                       (item) => (
                         <option
-                          key={item.value}
-                          value={item.value}
+                          key={
+                            item.value
+                          }
+                          value={
+                            item.value
+                          }
                         >
                           {item.label}
                         </option>
                       )
                     )}
+
                   </select>
+
                 </div>
 
                 {/* UMKM */}
-                {form.tipe === "umkm" && (
+
+                {form.tipe ===
+                  "umkm" && (
+
                   <div>
+
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       UMKM Pemilik
                     </label>
@@ -851,7 +1137,8 @@ export default function ProdukAdminPage() {
                     <select
                       name="idUmkm"
                       value={
-                        form.idUmkm ?? ""
+                        form.idUmkm ??
+                        ""
                       }
                       onChange={
                         handleChange
@@ -859,6 +1146,7 @@ export default function ProdukAdminPage() {
                       required
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     >
+
                       <option value="">
                         Pilih UMKM
                       </option>
@@ -866,21 +1154,30 @@ export default function ProdukAdminPage() {
                       {umkm.map(
                         (item) => (
                           <option
-                            key={item.id}
-                            value={item.id}
+                            key={
+                              item.id
+                            }
+                            value={
+                              item.id
+                            }
                           >
                             {item.nama}
                           </option>
                         )
                       )}
+
                     </select>
+
                   </div>
                 )}
 
                 {/* Perorangan */}
+
                 {form.tipe ===
                   "perorangan" && (
+
                   <div>
+
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       Nama Penjual
                     </label>
@@ -897,13 +1194,16 @@ export default function ProdukAdminPage() {
                       placeholder="Contoh: Pak Ahmad"
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     />
+
                   </div>
                 )}
 
                 {/* Kategori + Harga */}
+
                 <div className="grid gap-5 sm:grid-cols-2">
 
                   <div>
+
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       Kategori
                     </label>
@@ -919,6 +1219,7 @@ export default function ProdukAdminPage() {
                       required
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     >
+
                       <option value="">
                         Pilih kategori
                       </option>
@@ -926,7 +1227,9 @@ export default function ProdukAdminPage() {
                       {categories.map(
                         (category) => (
                           <option
-                            key={category}
+                            key={
+                              category
+                            }
                             value={
                               category
                             }
@@ -935,10 +1238,13 @@ export default function ProdukAdminPage() {
                           </option>
                         )
                       )}
+
                     </select>
+
                   </div>
 
                   <div>
+
                     <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                       Harga
                     </label>
@@ -948,7 +1254,8 @@ export default function ProdukAdminPage() {
                       min="0"
                       name="harga"
                       value={
-                        form.harga ?? ""
+                        form.harga ??
+                        ""
                       }
                       onChange={
                         handlePriceChange
@@ -956,12 +1263,15 @@ export default function ProdukAdminPage() {
                       placeholder="15000"
                       className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                     />
+
                   </div>
 
                 </div>
 
                 {/* Deskripsi */}
+
                 <div>
+
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Deskripsi Produk
                   </label>
@@ -978,10 +1288,13 @@ export default function ProdukAdminPage() {
                     placeholder="Deskripsi produk..."
                     className="w-full resize-y rounded-xl border border-[#dfe6e2] bg-white px-4 py-3 text-[13px] leading-[1.7] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   />
+
                 </div>
 
                 {/* Status */}
+
                 <div>
+
                   <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
                     Status
                   </label>
@@ -996,6 +1309,7 @@ export default function ProdukAdminPage() {
                     }
                     className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[12px] text-[#37413d] outline-none focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
                   >
+
                     <option value="aktif">
                       Aktif
                     </option>
@@ -1003,52 +1317,55 @@ export default function ProdukAdminPage() {
                     <option value="nonaktif">
                       Nonaktif
                     </option>
+
                   </select>
+
                 </div>
 
-                {/* Foto */}
-                <div>
-                  <label className="mb-2 block text-[11px] font-semibold text-[#37413d]">
-                    URL Foto
-                  </label>
+                {/* =================================================
+                    FOTO PRODUK - CLOUDINARY
+                ================================================== */}
 
-                  <input
-                    name="foto"
-                    value={form.foto}
-                    onChange={
-                      handleChange
+                <div>
+
+                  <ImageUpload
+                    label="Foto Produk"
+                    folder="produk"
+                    value={
+                      form.foto
                     }
-                    placeholder="https://..."
-                    className="h-12 w-full rounded-xl border border-[#dfe6e2] bg-white px-4 text-[13px] text-[#17201d] outline-none placeholder:text-[#a2aaa6] focus:border-[#075b43] focus:ring-4 focus:ring-[#075b43]/10"
+                    publicId={
+                      form.fotoPath
+                    }
+                    onUpload={
+                      handlePhotoUpload
+                    }
+                    onRemove={
+                      handlePhotoRemove
+                    }
                   />
 
-                  <p className="mt-2 text-[10px] text-[#9aa39f]">
-                    Untuk sementara gunakan
-                    URL foto. Upload Firebase
-                    Storage akan ditambahkan
-                    setelah Storage diaktifkan.
+                  <p className="mt-2 text-[10px] leading-[1.6] text-[#9aa39f]">
+                    Foto produk akan disimpan
+                    di Cloudinary dan digunakan
+                    sebagai foto utama produk.
                   </p>
 
-                  {form.foto && (
-                    <div className="mt-3 h-36 overflow-hidden rounded-xl bg-[#edf2ef]">
-                      <img
-                        src={form.foto}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  )}
                 </div>
 
               </div>
 
-              {/* Footer */}
+              {/* FOOTER */}
+
               <div className="flex justify-end gap-3 border-t border-[#edf1ef] bg-[#fafcfb] px-6 py-4">
 
                 <button
                   type="button"
-                  onClick={closeForm}
-                  className="rounded-xl border border-[#dfe6e2] bg-white px-5 py-2.5 text-[11px] font-semibold text-[#68736e] hover:bg-[#f4f7f5]"
+                  onClick={
+                    closeForm
+                  }
+                  disabled={saving}
+                  className="rounded-xl border border-[#dfe6e2] bg-white px-5 py-2.5 text-[11px] font-semibold text-[#68736e] hover:bg-[#f4f7f5] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Batal
                 </button>
@@ -1058,6 +1375,7 @@ export default function ProdukAdminPage() {
                   disabled={saving}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#003c2b] px-5 py-2.5 text-[11px] font-semibold text-white hover:bg-[#075b43] disabled:opacity-60"
                 >
+
                   {saving && (
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   )}
@@ -1067,6 +1385,7 @@ export default function ProdukAdminPage() {
                     : editingId
                       ? "Simpan Perubahan"
                       : "Tambah Produk"}
+
                 </button>
 
               </div>
@@ -1074,6 +1393,7 @@ export default function ProdukAdminPage() {
             </form>
 
           </div>
+
         </div>
       )}
 
