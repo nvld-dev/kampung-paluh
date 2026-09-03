@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 import {
   createUmkm,
@@ -20,7 +21,9 @@ const createInitialForm = (): UmkmData => ({
   alamat: "",
   kontak: "",
   foto: "",
+  fotoPath: "",
   gallery: [],
+  galleryPaths: [],
   status: "aktif",
 });
 
@@ -112,8 +115,12 @@ export default function UmkmAdminPage() {
       alamat: item.alamat ?? "",
       kontak: item.kontak ?? "",
       foto: item.foto ?? "",
+      fotoPath: item.fotoPath ?? "",
       gallery: Array.isArray(item.gallery)
         ? item.gallery
+        : [],
+      galleryPaths: Array.isArray(item.galleryPaths)
+        ? item.galleryPaths
         : [],
       status: item.status ?? "aktif",
     });
@@ -140,27 +147,26 @@ export default function UmkmAdminPage() {
   function addGalleryPhoto() {
     setForm((previous) => ({
       ...previous,
-      gallery: [
-        ...(previous.gallery || []),
-        "",
-      ],
+      gallery: [...(previous.gallery || []), ""],
+      galleryPaths: [...(previous.galleryPaths || []), ""],
     }));
   }
 
   function updateGalleryPhoto(
     index: number,
-    value: string
+    data: { url: string; publicId: string }
   ) {
     setForm((previous) => {
-      const gallery = [
-        ...(previous.gallery || []),
-      ];
+      const gallery = [...(previous.gallery || [])];
+      const galleryPaths = [...(previous.galleryPaths || [])];
 
-      gallery[index] = value;
+      gallery[index] = data.url;
+      galleryPaths[index] = data.publicId;
 
       return {
         ...previous,
         gallery,
+        galleryPaths,
       };
     });
   }
@@ -169,8 +175,10 @@ export default function UmkmAdminPage() {
     setForm((previous) => ({
       ...previous,
       gallery: (previous.gallery || []).filter(
-        (_, galleryIndex) =>
-          galleryIndex !== index
+        (_, galleryIndex) => galleryIndex !== index
+      ),
+      galleryPaths: (previous.galleryPaths || []).filter(
+        (_, galleryIndex) => galleryIndex !== index
       ),
     }));
   }
@@ -206,13 +214,19 @@ export default function UmkmAdminPage() {
      * - hapus spasi
      * - hapus URL duplikat
      */
-    const cleanedGallery = Array.from(
-      new Set(
-        (form.gallery || [])
-          .map((photo) => photo.trim())
-          .filter(Boolean)
-      )
-    );
+    const cleanedGallery: string[] = [];
+    const cleanedGalleryPaths: string[] = [];
+
+    (form.gallery || []).forEach((photo, index) => {
+      const url = photo.trim();
+
+      if (!url) return;
+
+      cleanedGallery.push(url);
+      cleanedGalleryPaths.push(
+        form.galleryPaths?.[index]?.trim() || ""
+      );
+    });
 
     const payload: UmkmData = {
       ...form,
@@ -232,8 +246,10 @@ export default function UmkmAdminPage() {
       kontak: form.kontak.trim(),
 
       foto: form.foto.trim(),
+      fotoPath: form.fotoPath?.trim() || "",
 
       gallery: cleanedGallery,
+      galleryPaths: cleanedGalleryPaths,
     };
 
     try {
@@ -294,6 +310,38 @@ export default function UmkmAdminPage() {
     try {
       setError("");
       setMessage("");
+
+      const mediaIds = [
+        item.fotoPath,
+        ...(item.galleryPaths || []),
+      ].filter(
+        (publicId): publicId is string =>
+          typeof publicId === "string" && publicId.trim().length > 0
+      );
+
+      for (const publicId of mediaIds) {
+        try {
+          const response = await fetch("/api/cloudinary/delete", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ publicId }),
+          });
+
+          if (!response.ok) {
+            console.error(
+              "Gagal menghapus media Cloudinary:",
+              publicId
+            );
+          }
+        } catch (mediaError) {
+          console.error(
+            "Gagal menghapus media Cloudinary:",
+            mediaError
+          );
+        }
+      }
 
       await deleteUmkm(item.id);
 
@@ -780,148 +828,75 @@ export default function UmkmAdminPage() {
                 {/* FOTO UTAMA */}
 
                 <FormField label="Foto Utama">
-
-                  <input
-                    name="foto"
+                  <ImageUpload
+                    label="Foto Utama"
+                    folder="umkm"
                     value={form.foto}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                    className={inputClass}
+                    publicId={form.fotoPath}
+                    onUpload={(image) => {
+                      setForm((previous) => ({
+                        ...previous,
+                        foto: image.url,
+                        fotoPath: image.publicId,
+                      }));
+                    }}
+                    onRemove={() => {
+                      setForm((previous) => ({
+                        ...previous,
+                        foto: "",
+                        fotoPath: "",
+                      }));
+                    }}
                   />
 
                   <p className="mt-2 text-[10px] leading-[1.6] text-[#9aa39f]">
-                    Foto utama yang digunakan sebagai
-                    thumbnail dan foto utama halaman
-                    detail UMKM.
+                    Foto utama UMKM yang ditampilkan sebagai thumbnail dan foto utama halaman detail.
                   </p>
-
-                  {form.foto && (
-                    <div className="mt-3 overflow-hidden rounded-xl bg-[#edf2ef]">
-
-                      <img
-                        src={form.foto}
-                        alt="Preview foto utama"
-                        className="h-40 w-full object-cover"
-                        onError={(event) => {
-                          event.currentTarget.style.display =
-                            "none";
-                        }}
-                      />
-
-                    </div>
-                  )}
-
                 </FormField>
 
                 {/* GALLERY */}
 
                 <FormField label="Gallery Foto">
-
-                  <div className="space-y-3">
-
-                    {(form.gallery || []).map(
-                      (photo, index) => (
-                        <div
-                          key={index}
-                          className="
-                            rounded-xl
-                            border border-[#dfe6e2]
-                            bg-[#fafcfb]
-                            p-3
-                          "
-                        >
-
-                          <div className="flex gap-2">
-
-                            <input
-                              type="url"
-                              value={photo}
-                              onChange={(event) =>
-                                updateGalleryPhoto(
-                                  index,
-                                  event.target.value
-                                )
-                              }
-                              placeholder={`URL foto ${index + 1}`}
-                              className={inputClass}
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeGalleryPhoto(
-                                  index
-                                )
-                              }
-                              className="
-                                h-12 w-12 shrink-0
-                                rounded-xl
-                                border border-[#eadbd8]
-                                text-[18px]
-                                text-[#9a625d]
-                                transition-colors
-                                hover:bg-[#fff5f3]
-                                hover:text-[#a63d32]
-                              "
-                              aria-label={`Hapus foto ${index + 1}`}
-                            >
-                              ×
-                            </button>
-
-                          </div>
-
-                          {photo && (
-                            <div className="mt-3 overflow-hidden rounded-xl bg-[#edf2ef]">
-
-                              <img
-                                src={photo}
-                                alt={`Gallery ${index + 1}`}
-                                className="h-32 w-full object-cover"
-                                onError={(event) => {
-                                  event.currentTarget.style.display =
-                                    "none";
-                                }}
-                              />
-
-                            </div>
-                          )}
-
-                        </div>
-                      )
-                    )}
-
+                  <div className="space-y-4">
+                    {(form.gallery || []).map((photo, index) => (
+                      <div
+                        key={`${index}-${form.galleryPaths?.[index] || ""}`}
+                        className="rounded-xl border border-[#dfe6e2] bg-[#fafcfb] p-4"
+                      >
+                        <ImageUpload
+                          label={`Foto Gallery ${index + 1}`}
+                          folder="umkm"
+                          value={photo}
+                          publicId={form.galleryPaths?.[index]}
+                          onUpload={(image) =>
+                            updateGalleryPhoto(index, image)
+                          }
+                          onRemove={() =>
+                            removeGalleryPhoto(index)
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
 
                   <button
                     type="button"
                     onClick={addGalleryPhoto}
                     className="
-                      mt-3 inline-flex
-                      items-center gap-2
-                      rounded-xl
-                      border border-[#cfe0d7]
-                      bg-[#edf5f0]
-                      px-4 py-2.5
-                      text-[11px]
-                      font-semibold
-                      text-[#075b43]
-                      transition-colors
-                      hover:bg-[#dcebe3]
+                      mt-3 inline-flex items-center gap-2
+                      rounded-xl border border-[#cfe0d7]
+                      bg-[#edf5f0] px-4 py-2.5
+                      text-[11px] font-semibold text-[#075b43]
+                      transition-colors hover:bg-[#dcebe3]
                     "
                   >
-                    <span className="text-[16px] leading-none">
-                      +
-                    </span>
-
+                    <span className="text-[16px] leading-none">+</span>
                     Tambah Foto Gallery
                   </button>
 
                   <p className="mt-2 text-[10px] leading-[1.6] text-[#9aa39f]">
-                    Tambahkan beberapa URL foto untuk
-                    ditampilkan sebagai gallery pada
-                    halaman detail UMKM.
+                    Upload beberapa foto untuk ditampilkan pada halaman detail UMKM.
                   </p>
-
                 </FormField>
 
               </div>

@@ -120,33 +120,33 @@ export default function Navbar() {
       }`}
     >
       <div
-        className={`mx-auto flex max-w-[1720px] items-center justify-between rounded-[22px] border border-black/[0.05] bg-white/95 px-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl transition-[padding] duration-300 dark:border-white/[0.07] dark:bg-[#101914]/95 sm:px-5 ${
+        className={`mx-auto flex max-w-[1720px] items-center justify-between rounded-[22px] px-4 transition-all duration-300 sm:px-5 ${
           scrolled ? "py-2" : "py-3"
+        } ${
+          scrolled
+            ? "border border-black/[0.05] bg-white/95 shadow-[0_8px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#101914]/95"
+            : "border border-transparent bg-transparent shadow-none backdrop-blur-0"
         }`}
       >
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-3">
-
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-[15px]">
-
             <img
               src="/images/logo.png"
               alt="Logo Kampung Paluh"
               className="h-10 w-10 object-contain"
             />
-
           </div>
 
           <div className="hidden sm:block">
-            <div className="text-[17px] font-semibold tracking-[-0.02em] text-[#173d31] dark:text-[#edf5f0]">
+            <div className="text-[17px] font-bold tracking-[-0.02em] text-[#173d31] dark:text-[#edf5f0]">
               Kampung Paluh
             </div>
 
-            <div className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.18em] text-[#7b8983] dark:text-[#82958c]">
+            <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#7b8983] dark:text-[#82958c]">
               Portal Promosi Kampung
             </div>
           </div>
-
         </Link>
 
         {/* Desktop navigation */}
@@ -164,12 +164,12 @@ export default function Navbar() {
               }}
               onMouseEnter={() => setHovered(item.href)}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`py-2 text-[12.5px] font-medium tracking-[0.01em] transition-colors duration-200 ${
-                isActive(item.href)
-                  ? "text-[#075b43] dark:text-[#9de0bf]"
-                  : "text-[#68736e] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:text-[#9de0bf]"
-              }`}
-            >
+              className={`py-2 text-[12.5px] font-semibold tracking-[0.01em] transition-colors duration-200 ${
+              isActive(item.href)
+                ? "text-[#075b43] dark:text-[#9de0bf]"
+                : "text-[#68736e] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:text-[#9de0bf]"
+            }`}  
+          >
               {item.label}
             </Link>
           ))}
@@ -218,8 +218,8 @@ export default function Navbar() {
                 </svg>
               ) : (
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-                  <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.7" />
-                  <path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2.1" />
+                  <path d="M16 16L20 20" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
                 </svg>
               )}
             </button>
@@ -299,10 +299,10 @@ export default function Navbar() {
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`border-l-2 px-4 py-3 text-[14px] font-medium transition-colors ${
-                isActive(item.href)
-                  ? "border-[#075b43] text-[#075b43] dark:border-[#9de0bf] dark:text-[#9de0bf]"
-                  : "border-transparent text-[#68736e] hover:border-[#dce3df] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:border-[#293a32] dark:hover:text-[#9de0bf]"
+              className={`border-l-2 px-4 py-3 text-[14px] font-semibold transition-colors ${
+              isActive(item.href)
+                ? "border-[#075b43] text-[#075b43] dark:border-[#9de0bf] dark:text-[#9de0bf]"
+                : "border-transparent text-[#68736e] hover:border-[#dce3df] hover:text-[#075b43] dark:text-[#9aa9a2] dark:hover:border-[#293a32] dark:hover:text-[#9de0bf]"
               }`}
             >
               {item.label}

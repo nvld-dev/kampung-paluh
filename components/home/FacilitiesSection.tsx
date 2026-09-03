@@ -332,41 +332,14 @@ function FacilityIcon({ name }: { name: string }) {
    markup untuk data statis & data Firebase)
 ===================================================== */
 
-function FacilityCard({
-  nama,
-  meta,
-  variant = "solid",
-}: {
+function FacilityCard({ nama, meta, variant = "solid",} : {
   nama: string;
   meta: string;
   variant?: "solid" | "tint";
 }) {
   return (
     <div
-      className="
-        group
-        flex
-        w-full
-        items-center
-        gap-3.5
-        rounded-2xl
-        border
-        border-black/[0.04]
-        bg-[#f3f5f3]
-        py-3.5
-        pl-3.5
-        pr-4
-        transition-all
-        duration-300
-        hover:border-[#075b43]/10
-        hover:bg-[#e9f1ed]
-        hover:shadow-[0_10px_26px_rgba(0,60,43,0.07)]
-        dark:border-white/[0.06]
-        dark:bg-[#12221b]
-        dark:hover:border-[#75c6a4]/15
-        dark:hover:bg-[#17352a]
-        sm:w-[calc(50%-8px)]
-      "
+      className="group flex w-full items-center gap-3.5 rounded-2xl border border-black/[0.04] bg-[#f3f5f3] py-3.5 pl-3.5 pr-4 transition-all duration-300 hover:border-[#075b43]/10 hover:bg-[#e9f1ed] hover:shadow-[0_10px_26px_rgba(0,60,43,0.07)] dark:border-white/[0.06] dark:bg-[#12221b] dark:hover:border-[#75c6a4]/15 dark:hover:bg-[#17352a] sm:w-[calc(50%-8px)]"
     >
       {/* ICON BADGE — solid untuk fasilitas utama (bobot lebih tegas),
           tint untuk fasilitas tambahan (bobot lebih ringan) */}
@@ -374,45 +347,8 @@ function FacilityCard({
       <div
         className={
           variant === "solid"
-            ? `
-              flex
-              h-12
-              w-12
-              shrink-0
-              items-center
-              justify-center
-              rounded-[14px]
-              bg-[#075b43]
-              text-white
-              shadow-[0_6px_16px_rgba(7,91,67,0.28)]
-              transition-transform
-              duration-300
-              group-hover:-translate-y-0.5
-              group-hover:rotate-[-2deg]
-              dark:bg-[#75c6a4]
-              dark:text-[#0a110e]
-              dark:shadow-[0_6px_16px_rgba(117,198,164,0.18)]
-            `
-            : `
-              flex
-              h-12
-              w-12
-              shrink-0
-              items-center
-              justify-center
-              rounded-[14px]
-              border
-              border-[#075b43]/15
-              bg-[#075b43]/[0.06]
-              text-[#075b43]
-              transition-transform
-              duration-300
-              group-hover:-translate-y-0.5
-              group-hover:rotate-[-2deg]
-              dark:border-[#75c6a4]/20
-              dark:bg-[#75c6a4]/[0.08]
-              dark:text-[#75c6a4]
-            `
+            ? `flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[#075b43] text-white shadow-[0_6px_16px_rgba(7,91,67,0.28)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-2deg] dark:bg-[#75c6a4] dark:text-[#0a110e] dark:shadow-[0_6px_16px_rgba(117,198,164,0.18)]`
+            : `flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] border border-[#075b43]/15 bg-[#075b43]/[0.06] text-[#075b43] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-2deg] dark:border-[#75c6a4]/20 dark:bg-[#75c6a4]/[0.08] dark:text-[#75c6a4]`
         }
       >
         <FacilityIcon name={nama} />
@@ -577,50 +513,19 @@ export default function FacilitiesSection() {
             RIGHT — PETA INFOGRAFIS
         ================================================= */}
 
-        <div
-          className="
-            relative
-            overflow-hidden
-            rounded-[28px]
-            border
-            border-[#e1e9e4]
-            bg-[#edf2ef]
-            shadow-[0_15px_45px_rgba(0,60,43,0.06)]
-            transition-all
-            duration-500
-            dark:border-[#263b32]
-            dark:bg-[#12221b]
-          "
-        >
+        <div className="relative overflow-hidden rounded-[28px] border border-[#e1e9e4] bg-[#edf2ef] shadow-[0_15px_45px_rgba(0,60,43,0.06)] transition-all duration-500 dark:border-[#263b32] dark:bg-[#12221b]" >
           {/* FOTO PETA */}
 
           <img
             src="/images/petadesa.webp"
             alt="Peta Infografis Kampung Paluh"
-            className="
-              block
-              h-auto
-              min-h-[420px]
-              w-full
-              object-cover
-              transition-transform
-              duration-700
-              hover:scale-[1.02]
-            "
+            className="block h-auto min-h-[420px] w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
           />
 
           {/* OVERLAY */}
 
           <div
-            className="
-              pointer-events-none
-              absolute
-              inset-0
-              bg-gradient-to-t
-              from-black/[0.18]
-              via-transparent
-              to-transparent
-            "
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/[0.18] via-transparent to-transparent"
           />
         </div>
       </div>

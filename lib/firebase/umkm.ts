@@ -28,8 +28,13 @@ export interface UmkmData {
   deskripsi: string;
   alamat: string;
   kontak: string;
+
   foto: string;
+  fotoPath?: string;
+
   gallery?: string[];
+  galleryPaths?: string[];
+
   status: "aktif" | "nonaktif";
 }
 
@@ -135,9 +140,15 @@ export async function createUmkm(
     deskripsi: data.deskripsi,
     alamat: data.alamat,
     kontak: data.kontak,
+
     foto: data.foto,
+    fotoPath: data.fotoPath || "",
+
     gallery: data.gallery || [],
+    galleryPaths: data.galleryPaths || [],
+
     status: data.status,
+
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -166,18 +177,24 @@ export async function updateUmkm(
   await updateDoc(umkmRef, {
     nama: data.nama,
     slug,
+
     pemilik: data.pemilik,
     kategori: data.kategori,
     deskripsi: data.deskripsi,
     alamat: data.alamat,
     kontak: data.kontak,
+
     foto: data.foto,
+    fotoPath: data.fotoPath || "",
+
     gallery: data.gallery || [],
+    galleryPaths: data.galleryPaths || [],
+
     status: data.status,
+
     updatedAt: serverTimestamp(),
   });
 }
-
 /* =========================================================
    DELETE UMKM
 ========================================================= */
